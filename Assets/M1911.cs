@@ -25,13 +25,17 @@ public class M1911 : MonoBehaviour
     /// </summary>
     public GameObject bullet;
     /// <summary>
+    /// seconds before spawned bullet is destroyed if no target hit.
+    /// </summary>
+    public float bulletLifetime = 5f;
+    /// <summary>
     /// Transform representing the barrel pivot / muzzle position and rotation.
     /// </summary>
-    public Transform barrelPivot;
+        public Transform barrelPivot;
     /// <summary>
-    /// Controll velocity of the bullet.
+    /// Controll velocity of the bullet (Default 300f in reality).
     /// </summary>
-    public float shootingSpeed = 1;
+    public float shootingSpeed = 300f;
     /// <summary>
     /// ParticleSystem from the GameObject muzzleFlash.
     /// </summary>
@@ -137,9 +141,20 @@ public class M1911 : MonoBehaviour
     /// </summary>
     void Fire()
     {
-        
-        var bulletrb = Instantiate(bullet, barrelPivot.position, barrelPivot.rotation).GetComponent<Rigidbody>();
+
+        GameObject bulletInstance = Instantiate(bullet, barrelPivot.position, barrelPivot.rotation);
+
+        // get rigidbody
+        Rigidbody bulletrb = bulletInstance.GetComponent<Rigidbody>();
+        if (bulletrb == null)
+        {
+            Debug.LogWarning("Bullet prefab has no Rigidbody. Destroying instance.");
+            Destroy(bulletInstance, 5f);
+            return;
+        }
+        bulletrb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
         bulletrb.velocity = barrelPivot.forward * shootingSpeed;
+        Destroy(bulletInstance, bulletLifetime);
 
         // Play muzzle flash animation.
         //if (muzzleFlashPS != null && muzzleFlashPS.gameObject.activeInHierarchy)
