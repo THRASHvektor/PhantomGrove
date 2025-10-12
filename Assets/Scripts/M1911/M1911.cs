@@ -31,16 +31,11 @@ public class M1911 : MonoBehaviour
     /// <summary>
     /// Transform representing the barrel pivot / muzzle position and rotation.
     /// </summary>
-        public Transform barrelPivot;
+    public Transform barrelPivot;
     /// <summary>
     /// Controll velocity of the bullet (Default 300f in reality).
     /// </summary>
     public float shootingSpeed = 300f;
-    /// <summary>
-    /// ParticleSystem from the GameObject muzzleFlash.
-    /// </summary>
-    private ParticleSystem muzzleFlashPS;
-
     
     [Header("Casing")]
     /// <summary>
@@ -99,10 +94,7 @@ public class M1911 : MonoBehaviour
         animator = GetComponentInChildren<Animator>(true);
         interactable = GetComponent<Interactable>();
         nextAllowedFireTime[SteamVR_Input_Sources.Any] = 0f;
-        if (muzzleFlash != null)
-        {
-            muzzleFlashPS = muzzleFlash.GetComponent<ParticleSystem>();
-        }
+        
     }
 
     /// <summary>
@@ -122,7 +114,6 @@ public class M1911 : MonoBehaviour
                     Fire();
 
                     // Double shot decision.
-                    // Havent test yet!
                     if (Random.value <= doubleShotChance)
                     {
                         //  Schedule second shot after delay, but don't allow second shot to bypass cooldown:
@@ -144,7 +135,7 @@ public class M1911 : MonoBehaviour
 
         GameObject bulletInstance = Instantiate(bullet, barrelPivot.position, barrelPivot.rotation);
 
-        // get rigidbody
+        // Get Compoment Rigidbody.
         Rigidbody bulletrb = bulletInstance.GetComponent<Rigidbody>();
         if (bulletrb == null)
         {
@@ -152,21 +143,21 @@ public class M1911 : MonoBehaviour
             Destroy(bulletInstance, 5f);
             return;
         }
+        // Init Bullet Rigibody value.
         bulletrb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
         bulletrb.velocity = barrelPivot.forward * shootingSpeed;
+        //Get Compoment BulletBehavior.
+        var bb = bulletInstance.GetComponent<BulletBehavior>();
+        if (bb != null)
+        {
+            // Bind current gun to this bullet for further use, e.g. fire rate change.
+            bb.shooter = this;
+        }
         Destroy(bulletInstance, bulletLifetime);
-
-        // Play muzzle flash animation.
-        //if (muzzleFlashPS != null && muzzleFlashPS.gameObject.activeInHierarchy)
-        //{
-        //    muzzleFlashPS.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-        //    muzzleFlashPS.Play(true);
-        //}
 
         //new muzzle flash function
         if (muzzleFlash)
         {
-            Debug.Log("muzzle");
             GameObject tempFlash;
             tempFlash = Instantiate(muzzleFlash, barrelPivot.position, barrelPivot.rotation);
 
@@ -259,5 +250,57 @@ public class M1911 : MonoBehaviour
 
         Fire();
         yield break;
+    }
+
+    /// <summary>
+    /// Set the double-shot probability (0..1).
+    /// </summary>
+    /// <param name="chance">Probability between 0 and 1 (inclusive).</param>
+    public void SetDoubleShotChance(float chance)
+    {
+        doubleShotChance = Mathf.Clamp01(chance);
+    }
+
+    /// <summary>
+    /// Get the current double-shot probability (0..1).
+    /// </summary>
+    /// <returns>Current doubleShotChance.</returns>
+    public float GetDoubleShotChance()
+    {
+        return doubleShotChance;
+    }
+
+    /// <summary>
+    /// Set M1911 Bulllet speed.
+    /// </summary>
+    /// <param name="speed">default speed is 300f</param>
+    public void SetBulletSpeed(float speed = 300f)
+    {
+        shootingSpeed = speed;
+    }
+    /// <summary>
+    /// Get the current Bullet speed.
+    /// </summary>
+    /// <returns>Current bullet speed</returns>
+    public float GetBulletSpeed()
+    {
+        return shootingSpeed;
+    }
+
+    /// <summary>
+    /// Set Fire Rate.
+    /// </summary>
+    /// <param name="firerate"></param>
+    public void SetFireRate(float firerate)
+    {
+        roundsPerSecond = firerate;
+    }
+    /// <summary>
+    /// Get current Fire Rate.
+    /// </summary>
+    /// <returns></returns>
+    public float GetFireRate()
+    {
+        return roundsPerSecond;
     }
 }
