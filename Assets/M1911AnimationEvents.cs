@@ -2,20 +2,29 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Event controller for M1911 firing animation.
+/// </summary>
 public class M1911AnimationEvents : MonoBehaviour
 {
     private M1911 gun;
-    // Start is called before the first frame update
+    
     void Awake()
     {
         gun = GetComponentInParent<M1911>();
     }
-    public void Shoot()               // 对应动画事件 “Shoot”
+    /// <summary>
+    /// Empty.
+    /// </summary>
+    public void Shoot()               
     {
         
     }
 
-    public void CasingRelease()       // 对应动画事件 “CasingRelease”
+    /// <summary>
+    /// For CasingRelease animation
+    /// </summary>
+    public void CasingRelease()       
     {
         if (gun != null)
         {

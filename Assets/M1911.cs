@@ -4,31 +4,106 @@ using UnityEngine;
 using Valve.VR;
 using Valve.VR.InteractionSystem;
 
+/// <summary>
+/// M1911 behavior.
+/// Including Fireing, Bullet Shell Casting, Muzzle Flash Animation, Fire Rate Limit.
+/// todo: Double Shot Testing.
+/// </summary>
 public class M1911 : MonoBehaviour
-{ // 你原有的字段
-    public SteamVR_Action_Boolean fireAction; public GameObject muzzleFlash; public GameObject bullet; public Transform barrelPivot; public float shootingSpeed = 1; private ParticleSystem muzzleFlashPS;
+{
+    /// <summary>
+    /// SteamVR_Action_Boolean for trigger firing.
+    /// </summary>
+    public SteamVR_Action_Boolean fireAction;
+    /// <summary>
+    /// Muzzle flash GameObject (ParticleSystem).
+    /// </summary>
+    public GameObject muzzleFlash;
+    /// <summary>
+    /// Rigidbody Bullet Instance.
+    /// 
+    /// </summary>
+    public GameObject bullet;
+    /// <summary>
+    /// Transform representing the barrel pivot / muzzle position and rotation.
+    /// </summary>
+    public Transform barrelPivot;
+    /// <summary>
+    /// Controll velocity of the bullet.
+    /// </summary>
+    public float shootingSpeed = 1;
+    /// <summary>
+    /// ParticleSystem from the GameObject muzzleFlash.
+    /// </summary>
+    private ParticleSystem muzzleFlashPS;
 
-    // 新增：抛壳相关（来自 SimpleShoot）
+    
     [Header("Casing")]
+    /// <summary>
+    /// Casing prefab instantiated when firing.
+    /// </summary>
     public GameObject casingPrefab;
+    /// <summary>
+    /// Transform from which casings are ejected.
+    /// </summary>
     public Transform casingExitLocation;
-    [Tooltip("自动销毁抛壳时间")]
+
+    [Tooltip("Casing Destroy Timer")]
+    /// <summary>
+    /// Time in seconds before spawned casing is destroyed.
+    /// </summary>
     public float casingDestroyTimer = 2f;
-    [Tooltip("抛壳力度")]
+    
+
+    [Tooltip("Eject Power")]
+    /// <summary>
+    /// Force applied to ejected casings (default 150f).
+    /// 
+    /// </summary>
     public float ejectPower = 150f;
+
+    [Header("Fire Rate")]
+    /// <summary>
+    /// Fire rate in rounds per second.
+    /// </summary>
+    public float roundsPerSecond = 5f;
+    /// <summary>
+    /// // Tracks the next allowed fire time per input source
+    /// </summary>
+    private Dictionary<SteamVR_Input_Sources, float> nextAllowedFireTime = new Dictionary<SteamVR_Input_Sources, float>();
+
+    [Header("DoubleShot")]
+    /// <summary>
+    /// Probability (0..1) that a fired shot will trigger a second shot shortly after (default 0.05 = 5%).
+    /// </summary>
+    [Range(0f, 1f)]
+    public float doubleShotChance = 0.05f;
+    /// <summary>
+    /// Delay in seconds between the first and second bullet when double-shot triggers.
+    /// </summary>
+    public float doubleShotDelay = 0.1f; 
 
     private Interactable interactable;
     private Animator animator;
 
+    /// <summary>
+    /// Initialize references and internal timers.
+    /// </summary>
     void Start()
     {
+        // The animator is in the model, must get from its child.
         animator = GetComponentInChildren<Animator>(true);
         interactable = GetComponent<Interactable>();
+        nextAllowedFireTime[SteamVR_Input_Sources.Any] = 0f;
         if (muzzleFlash != null)
+        {
             muzzleFlashPS = muzzleFlash.GetComponent<ParticleSystem>();
-
+        }
     }
 
+    /// <summary>
+    /// Per-frame update: checks for attached hand and fire input, then enforces fire rate.
+    /// </summary>
     void Update()
     {
         if (interactable != null && interactable.attachedToHand != null)
@@ -36,62 +111,138 @@ public class M1911 : MonoBehaviour
             var source = interactable.attachedToHand.handType;
             if (fireAction != null && fireAction[source].stateDown)
             {
-                Fire();
+                float now = Time.time;
+                float nextAllowed = GetNextAllowedForSource(source);
+                if (now >= nextAllowed)
+                {
+                    Fire();
+
+                    // Double shot decision.
+                    // Havent test yet!
+                    if (Random.value <= doubleShotChance)
+                    {
+                        //  Schedule second shot after delay, but don't allow second shot to bypass cooldown:
+                        StartCoroutine(DoDoubleShotAfterDelay(source, doubleShotDelay));
+                    }
+
+                    SetNextAllowedForSource(source, now + (1f / Mathf.Max(0.0001f, roundsPerSecond)));
+                }
+                    
             }
         }
     }
 
+    /// <summary>
+    /// Perform a single fire action: instantiate bullet, play muzzle flash and play fire animation.
+    /// </summary>
     void Fire()
     {
-        Debug.Log("Fire!");
-
-        // 保留你的子弹逻辑
+        
         var bulletrb = Instantiate(bullet, barrelPivot.position, barrelPivot.rotation).GetComponent<Rigidbody>();
         bulletrb.velocity = barrelPivot.forward * shootingSpeed;
 
-        // 保留你的枪焰播放逻辑
-        if (muzzleFlashPS != null && muzzleFlashPS.gameObject.activeInHierarchy)
+        // Play muzzle flash animation.
+        //if (muzzleFlashPS != null && muzzleFlashPS.gameObject.activeInHierarchy)
+        //{
+        //    muzzleFlashPS.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        //    muzzleFlashPS.Play(true);
+        //}
+
+        //new muzzle flash function
+        if (muzzleFlash)
         {
-            muzzleFlashPS.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-            muzzleFlashPS.Play(true);
+            Debug.Log("muzzle");
+            GameObject tempFlash;
+            tempFlash = Instantiate(muzzleFlash, barrelPivot.position, barrelPivot.rotation);
+
+            //Destroy the muzzle flash effect
+            Destroy(tempFlash, 2f);
         }
 
-        // 播放开火动画（确保 Animator 里有名为 "Fire" 的状态）
+
+        // Play M1911 shooting amination.
         if (animator != null)
         {
-            // 如果你用的是 Trigger，也可以改为 SetTrigger("Fire")
             animator.Play("Fire", 0, 0f);
         }
-
-        // 方案A（推荐）：用动画事件在合适的帧调用 CasingRelease()
-        // 在 Fire 动画中添加一个 Animation Event，函数名填 "CasingRelease"
-
-        // 方案B（可选）：如果暂时没有动画事件，可直接解开下一行，开火瞬间就抛壳
-        // CasingRelease();
     }
 
-    // 抛壳逻辑（来自官方 SimpleShoot，略有清理）
+    /// <summary>
+    /// Instantiate and eject a casing from the casing exit transform.
+    /// </summary>
     public void CasingRelease()
     {
         if (!casingExitLocation || !casingPrefab)
+        {
             return;
+        }
 
         GameObject tempCasing = Instantiate(casingPrefab, casingExitLocation.position, casingExitLocation.rotation);
 
         var rb = tempCasing.GetComponent<Rigidbody>();
         if (rb != null)
         {
-            // 给出爆炸力让弹壳弹出（与官方一致，可按需求调方向/系数）
+            
             rb.AddExplosionForce(Random.Range(ejectPower * 0.7f, ejectPower),
                                  (casingExitLocation.position - casingExitLocation.right * 0.3f - casingExitLocation.up * 0.6f),
                                  1f);
 
-            rb.AddTorque(new Vector3(0,
-                                     Random.Range(100f, 500f),
-                                     Random.Range(100f, 1000f)),
-                         ForceMode.Impulse);
+            rb.AddTorque(new Vector3(0,Random.Range(100f, 500f),Random.Range(100f, 1000f)),ForceMode.Impulse);
         }
 
         Destroy(tempCasing, casingDestroyTimer);
+    }
+
+    /// <summary>
+    /// Get the next allowed fire time for a given SteamVR input source.
+    /// </summary>
+    /// <param name="source">Input source to query (LeftHand, RightHand, Any).</param>
+    /// <returns>(Time.time) Timestamp when next shot is allowed for that source.</returns>
+    private float GetNextAllowedForSource(SteamVR_Input_Sources source)
+    {
+        if (nextAllowedFireTime.TryGetValue(source, out var t))
+        {
+            return t;
+        }
+        return 0f;
+    }
+
+    /// <summary>
+    /// Set the next time this input source is allowed to fire.
+    /// </summary>
+    /// <param name="source">Input source to set the timer for.</param>
+    /// <param name="time">Time (Time.time) when next shot is allowed.</param>
+    private void SetNextAllowedForSource(SteamVR_Input_Sources source, float time)
+    {
+        nextAllowedFireTime[source] = time;
+    }
+
+    /// <summary>
+    /// Coroutine used to fire the second shot for the double-shot mechanic after a small delay.
+    /// </summary>
+    /// <param name="source">Input source that triggered the original shot.</param>
+    /// <param name="delay">Delay in seconds before firing the second shot.</param>
+    /// <returns>Coroutine enumerator.</returns>
+    private IEnumerator DoDoubleShotAfterDelay(SteamVR_Input_Sources source, float delay)
+    {
+        if (delay > 0f) {
+            yield return new WaitForSeconds(delay);
+        }
+
+        // Before firing second shot, ensure we still want it (optionally check if the gun is still held)
+        if (interactable == null || interactable.attachedToHand == null) {
+            yield break;
+        }
+        if (interactable.attachedToHand.handType != source) {
+            yield break;
+        }
+
+        // Optional: ensure the cooldown still allows it; here we treat the double shot as part of same firing event,
+        // so we do NOT check nextAllowedFireTime again. If you prefer to enforce cooldown, uncomment the check below.
+        // float now = Time.time;
+        // if (now < GetNextAllowedForSource(source)) yield break;
+
+        Fire();
+        yield break;
     }
 }
