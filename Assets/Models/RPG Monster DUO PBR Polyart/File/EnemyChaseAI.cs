@@ -12,7 +12,7 @@ public class MonsterChase : MonoBehaviour
 
     [Header("攻击参数")]
     public int damagePerHit = 10;
-    public float attackInterval = 2f;
+    public float attackCooldown = 5f; // 攻击冷却时间（秒）
 
     [Header("调试")]
     public bool drawGizmos = true;
@@ -51,7 +51,6 @@ public class MonsterChase : MonoBehaviour
 
         if (playerDistance <= chaseRadius)
         {
-            // 检查玩家是否在NavMesh上
             NavMeshHit hit;
             if (NavMesh.SamplePosition(player.position, out hit, 1.0f, NavMesh.AllAreas))
             {
@@ -60,15 +59,14 @@ public class MonsterChase : MonoBehaviour
         }
         else
         {
-            // 玩家离开追击范围，怪物停止移动
             agent.ResetPath();
         }
 
-        // 攻击逻辑
+        // 攻击冷却逻辑
         if (isPlayerInRange && playerHealth != null)
         {
             attackTimer += Time.deltaTime;
-            if (attackTimer >= attackInterval)
+            if (attackTimer >= attackCooldown)
             {
                 attackTimer = 0f;
                 playerHealth.TakeDamage(damagePerHit);
@@ -85,6 +83,11 @@ public class MonsterChase : MonoBehaviour
         if (other.transform == player)
         {
             isPlayerInRange = true;
+            attackTimer = 0f; // 进入时重置计时
+            if (playerHealth != null)
+            {
+                playerHealth.TakeDamage(damagePerHit); // 立即掉血
+            }
         }
     }
 
@@ -93,14 +96,13 @@ public class MonsterChase : MonoBehaviour
         if (other.transform == player)
         {
             isPlayerInRange = false;
+            attackTimer = 0f; // 离开时重置计时
         }
     }
 
     void OnDrawGizmosSelected()
     {
         if (!drawGizmos) return;
-
-        // 绘制追踪范围
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, chaseRadius);
     }
