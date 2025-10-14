@@ -84,6 +84,8 @@ public class M1911 : MonoBehaviour
 
     private Interactable interactable;
     private Animator animator;
+    private Rigidbody rb;
+
 
     /// <summary>
     /// Initialize references and internal timers.
@@ -135,12 +137,14 @@ public class M1911 : MonoBehaviour
 
         GameObject bulletInstance = Instantiate(bullet, barrelPivot.position, barrelPivot.rotation);
 
+        bulletInstance.layer = LayerMask.NameToLayer("Bullet");
+
         // Get Compoment Rigidbody.
         Rigidbody bulletrb = bulletInstance.GetComponent<Rigidbody>();
         if (bulletrb == null)
         {
             Debug.LogWarning("Bullet prefab has no Rigidbody. Destroying instance.");
-            Destroy(bulletInstance, 5f);
+            Destroy(bulletInstance, 1f);
             return;
         }
         // Init Bullet Rigibody value.
@@ -151,7 +155,8 @@ public class M1911 : MonoBehaviour
         if (bb != null)
         {
             // Bind current gun to this bullet for further use, e.g. fire rate change.
-            bb.shooter = this;
+            bb.shooter = this.gameObject;
+            bb.hittableLayers = LayerMask.GetMask("Enemy", "Default","World"); // 示例：击中敌人和地面会触发销毁
         }
         Destroy(bulletInstance, bulletLifetime);
 

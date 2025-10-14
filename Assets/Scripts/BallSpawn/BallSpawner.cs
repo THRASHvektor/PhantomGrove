@@ -37,6 +37,8 @@ public class BallSpawner : MonoBehaviour
     private int remainingBalls = 0;
     private bool waveInProgress = false;
 
+    public Transform playerTransform;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -103,7 +105,9 @@ public class BallSpawner : MonoBehaviour
             }
 
             GameObject go = Instantiate(ballPrefab, pos, anchor.rotation);
+            go.layer = LayerMask.NameToLayer("Enemy");
             go.name = $"Wave{wave}_Ball_{i}";
+            go.GetComponent<MonsterChase>().player = playerTransform;
             TargetBall tb = go.GetComponent<TargetBall>();
             if (tb != null)
             {
