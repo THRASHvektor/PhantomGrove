@@ -52,7 +52,9 @@ public class M1911 : MonoBehaviour
     /// Time in seconds before spawned casing is destroyed.
     /// </summary>
     public float casingDestroyTimer = 2f;
-    
+    private bool originalIsKinematic;
+    private RigidbodyInterpolation originalInterpolation;
+    private bool originalDetectCollisions;
 
     [Tooltip("Eject Power")]
     /// <summary>
@@ -334,60 +336,64 @@ public class M1911 : MonoBehaviour
     }
 
     // Called by SteamVR
-    //public void OnAttachedToHand(Valve.VR.InteractionSystem.Hand hand)
-    //{
-    //    // ensure rb cached
-    //    if (rb == null) rb = GetComponent<Rigidbody>() ?? GetComponentInChildren<Rigidbody>();
-    //    // parent to hand so transform follows exactly
-    //    transform.SetParent(hand.transform, true);
+    public void OnAttachedToHand(Valve.VR.InteractionSystem.Hand hand)
+    {
+        if (rb == null) rb = GetComponent<Rigidbody>() ?? GetComponentInChildren<Rigidbody>();
+        if (rb != null)
+        {
+            // save the original state
+            originalIsKinematic = rb.isKinematic;
+            originalInterpolation = rb.interpolation;
+            originalDetectCollisions = rb.detectCollisions;
 
-    //    if (rb != null)
-    //    {
-    //        // keep non-kinematic so SteamVR can write velocity
-    //        rb.isKinematic = false;
+            originalConstraints = rb.constraints;
+            originalUseGravity = rb.useGravity;
 
-    //        // save and freeze to prevent physics pushing while held
-    //        originalConstraints = rb.constraints;
-    //        originalUseGravity = rb.useGravity;
-    //        rb.useGravity = false;
-    //        rb.constraints = RigidbodyConstraints.FreezeAll;
-    //        savedConstraints = true;
+            //  Controlled by a father-son switch, disable interpolation to avoid "lagging behind
+            rb.isKinematic = true;
+            rb.interpolation = RigidbodyInterpolation.None;
+            rb.useGravity = false;
+          
 
-    //        // optional: make colliders triggers (avoid contact) and save original states
-    //        originalIsTrigger.Clear();
-    //        foreach (var c in GetComponentsInChildren<Collider>(true))
-    //        {
-    //            if (c == null) continue;
-    //            originalIsTrigger[c] = c.isTrigger;
-    //            c.isTrigger = true;
-    //        }
-    //    }
+            savedConstraints = true;
 
-    //    //// optional: small positional offset if your model needs alignment
-    //    //transform.localPosition = Vector3.zero;
-    //    //transform.localRotation = Quaternion.identity;
-    //}
+            
+            originalIsTrigger.Clear();
+            foreach (var c in GetComponentsInChildren<Collider>(true))
+            {
+                if (!c) continue;
+                originalIsTrigger[c] = c.isTrigger;
+                c.isTrigger = true;
+            }
+            var attach = hand.objectAttachmentPoint ? hand.objectAttachmentPoint : hand.transform;
+            if (transform.parent != attach)
+                transform.SetParent(attach, /*worldPositionStays*/ true);
+        }
 
-    //public void OnDetachedFromHand(Valve.VR.InteractionSystem.Hand hand)
-    //{
-    //    // unparent (keep world position)
-    //    //transform.SetParent(null, true);
+       
+    }
 
-    //    if (rb != null && savedConstraints)
-    //    {
-    //        // restore constraints/gravity so physics can act again
-    //        rb.useGravity = originalUseGravity;
-    //        rb.constraints = originalConstraints;
-    //        // keep rb.isKinematic = false so SteamVR's final velocity application works
-    //    }
+    public void OnDetachedFromHand(Valve.VR.InteractionSystem.Hand hand)
+    {
+        if (rb != null)
+        {
+            // Release: Restore physical properties and enable normal throwing/dropping.
+            rb.useGravity = originalUseGravity;
+            rb.constraints = originalConstraints;
+            rb.isKinematic = originalIsKinematic;
+            rb.interpolation = originalInterpolation;
+            rb.detectCollisions = originalDetectCollisions;
+        }
 
-    //    // restore collider trigger flags
-    //    foreach (var kv in originalIsTrigger)
-    //    {
-    //        if (kv.Key == null) continue;
-    //        kv.Key.isTrigger = kv.Value;
-    //    }
-    //    originalIsTrigger.Clear();
-    //    savedConstraints = false;
-    //}
+        foreach (var kv in originalIsTrigger)
+        {
+            if (kv.Key) kv.Key.isTrigger = kv.Value;
+        }
+        originalIsTrigger.Clear();
+        // 与上面对称，放手时解除父子关系（Hand 也会处理，留着更稳）
+        if (transform.parent == (hand.objectAttachmentPoint ? hand.objectAttachmentPoint : hand.transform))
+            transform.SetParent(null, true);
+
+        //如果武器还是不跟手，可以试试在SteamVR_Settings里面把Pose Update Mode改为On Update
+    }
 }
