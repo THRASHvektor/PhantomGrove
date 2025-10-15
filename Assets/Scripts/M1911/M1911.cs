@@ -167,7 +167,7 @@ public class M1911 : MonoBehaviour
         {
             // Bind current gun to this bullet for further use, e.g. fire rate change.
             bb.shooter = this.gameObject;
-            bb.hittableLayers = LayerMask.GetMask("Enemy", "Default","World"); // Ê¾Àı£º»÷ÖĞµĞÈËºÍµØÃæ»á´¥·¢Ïú»Ù
+            bb.hittableLayers = LayerMask.GetMask("Enemy", "Default","World"); // ç¤ºä¾‹ï¼šå‡»ä¸­æ•Œäººå’Œåœ°é¢ä¼šè§¦å‘é”€æ¯
         }
         Destroy(bulletInstance, bulletLifetime);
 
@@ -350,15 +350,15 @@ public class M1911 : MonoBehaviour
             }
         }
 
-        // optional: small positional offset if your model needs alignment
-        transform.localPosition = Vector3.zero;
-        transform.localRotation = Quaternion.identity;
+        //// optional: small positional offset if your model needs alignment
+        //transform.localPosition = Vector3.zero;
+        //transform.localRotation = Quaternion.identity;
     }
 
     public void OnDetachedFromHand(Valve.VR.InteractionSystem.Hand hand)
     {
         // unparent (keep world position)
-        transform.SetParent(null, true);
+        //transform.SetParent(null, true);
 
         if (rb != null && savedConstraints)
         {
