@@ -40,6 +40,8 @@ public class BallSpawner : MonoBehaviour
     public Transform playerTransform;
 
     // Start is called before the first frame update
+
+    public GameObject cardmanager;
     void Start()
     {
         if (ballPrefab == null)
@@ -50,6 +52,10 @@ public class BallSpawner : MonoBehaviour
         if (spawnPoints == null || spawnPoints.Count == 0)
         {
             Debug.LogError("No spawn points.");
+            return;
+        }
+        if(cardmanager == null)
+        {
             return;
         }
         StartCoroutine(SpawnWaveCoroutine(CurrentWave));
@@ -126,6 +132,9 @@ public class BallSpawner : MonoBehaviour
     {
         // wait for configured delay
         yield return new WaitForSeconds(waitBetweenWaves);
+
+        if ((CurrentWave % Mathf.Max(1, wavesPerGroup) == 0))
+            yield return cardmanager.GetComponent<CardManager>().ShowAndWaitSelection();
 
         // increment wave and spawn next
         CurrentWave++;
