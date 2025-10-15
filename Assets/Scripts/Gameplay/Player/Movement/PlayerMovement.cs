@@ -20,6 +20,7 @@ public class PlayerMovement : MonoBehaviour
     void Update()
     {
         Vector2 input = SteamVR_Actions.Phantom.Move.GetAxis(SteamVR_Input_Sources.LeftHand);
+        Debug.Log(input);
         Vector3 direction = new Vector3(input.x, 0, input.y);
         Vector3 headYaw = new Vector3(head.forward.x, 0, head.forward.z).normalized;
         Vector3 moveDirection = Quaternion.LookRotation(headYaw) * direction;
