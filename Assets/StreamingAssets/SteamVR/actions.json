@@ -51,7 +51,8 @@
     },
     {
       "name": "/actions/default/in/TouchPad",
-      "type": "vector2"
+      "type": "vector2",
+      "requirement": "mandatory"
     },
     {
       "name": "/actions/default/out/Haptic",

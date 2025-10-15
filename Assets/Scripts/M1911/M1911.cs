@@ -303,6 +303,11 @@ public class M1911 : MonoBehaviour
         return shootingSpeed;
     }
 
+    public void IncreaseBulletSpeedByPercentage(float percentage)
+    {
+        SetBulletSpeed(GetBulletSpeed() * (1f + percentage));
+    }
+
     /// <summary>
     /// Set Fire Rate.
     /// </summary>
@@ -319,62 +324,70 @@ public class M1911 : MonoBehaviour
     {
         return roundsPerSecond;
     }
+    /// <summary>
+    /// Increase fire rate.
+    /// </summary>
+    /// <param name="percentage"> Range in 0f - 1f</param>
+    public void IncreaseFireRateByPercentage(float percentage)
+    {
+        SetFireRate(GetFireRate() * (1f + percentage));
+    }
 
     // Called by SteamVR
-    public void OnAttachedToHand(Valve.VR.InteractionSystem.Hand hand)
-    {
-        // ensure rb cached
-        if (rb == null) rb = GetComponent<Rigidbody>() ?? GetComponentInChildren<Rigidbody>();
-        // parent to hand so transform follows exactly
-        transform.SetParent(hand.transform, true);
+    //public void OnAttachedToHand(Valve.VR.InteractionSystem.Hand hand)
+    //{
+    //    // ensure rb cached
+    //    if (rb == null) rb = GetComponent<Rigidbody>() ?? GetComponentInChildren<Rigidbody>();
+    //    // parent to hand so transform follows exactly
+    //    transform.SetParent(hand.transform, true);
 
-        if (rb != null)
-        {
-            // keep non-kinematic so SteamVR can write velocity
-            rb.isKinematic = false;
+    //    if (rb != null)
+    //    {
+    //        // keep non-kinematic so SteamVR can write velocity
+    //        rb.isKinematic = false;
 
-            // save and freeze to prevent physics pushing while held
-            originalConstraints = rb.constraints;
-            originalUseGravity = rb.useGravity;
-            rb.useGravity = false;
-            rb.constraints = RigidbodyConstraints.FreezeAll;
-            savedConstraints = true;
+    //        // save and freeze to prevent physics pushing while held
+    //        originalConstraints = rb.constraints;
+    //        originalUseGravity = rb.useGravity;
+    //        rb.useGravity = false;
+    //        rb.constraints = RigidbodyConstraints.FreezeAll;
+    //        savedConstraints = true;
 
-            // optional: make colliders triggers (avoid contact) and save original states
-            originalIsTrigger.Clear();
-            foreach (var c in GetComponentsInChildren<Collider>(true))
-            {
-                if (c == null) continue;
-                originalIsTrigger[c] = c.isTrigger;
-                c.isTrigger = true;
-            }
-        }
+    //        // optional: make colliders triggers (avoid contact) and save original states
+    //        originalIsTrigger.Clear();
+    //        foreach (var c in GetComponentsInChildren<Collider>(true))
+    //        {
+    //            if (c == null) continue;
+    //            originalIsTrigger[c] = c.isTrigger;
+    //            c.isTrigger = true;
+    //        }
+    //    }
 
-        //// optional: small positional offset if your model needs alignment
-        //transform.localPosition = Vector3.zero;
-        //transform.localRotation = Quaternion.identity;
-    }
+    //    //// optional: small positional offset if your model needs alignment
+    //    //transform.localPosition = Vector3.zero;
+    //    //transform.localRotation = Quaternion.identity;
+    //}
 
-    public void OnDetachedFromHand(Valve.VR.InteractionSystem.Hand hand)
-    {
-        // unparent (keep world position)
-        //transform.SetParent(null, true);
+    //public void OnDetachedFromHand(Valve.VR.InteractionSystem.Hand hand)
+    //{
+    //    // unparent (keep world position)
+    //    //transform.SetParent(null, true);
 
-        if (rb != null && savedConstraints)
-        {
-            // restore constraints/gravity so physics can act again
-            rb.useGravity = originalUseGravity;
-            rb.constraints = originalConstraints;
-            // keep rb.isKinematic = false so SteamVR's final velocity application works
-        }
+    //    if (rb != null && savedConstraints)
+    //    {
+    //        // restore constraints/gravity so physics can act again
+    //        rb.useGravity = originalUseGravity;
+    //        rb.constraints = originalConstraints;
+    //        // keep rb.isKinematic = false so SteamVR's final velocity application works
+    //    }
 
-        // restore collider trigger flags
-        foreach (var kv in originalIsTrigger)
-        {
-            if (kv.Key == null) continue;
-            kv.Key.isTrigger = kv.Value;
-        }
-        originalIsTrigger.Clear();
-        savedConstraints = false;
-    }
+    //    // restore collider trigger flags
+    //    foreach (var kv in originalIsTrigger)
+    //    {
+    //        if (kv.Key == null) continue;
+    //        kv.Key.isTrigger = kv.Value;
+    //    }
+    //    originalIsTrigger.Clear();
+    //    savedConstraints = false;
+    //}
 }
