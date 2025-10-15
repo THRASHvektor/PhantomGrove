@@ -97,9 +97,8 @@ public class CardManager : MonoBehaviour
         }
     }
 
-    //public void NotifySelected(CardEffectType effect, IShooter shooterContext)
-    //{
-    //    ApplyEffect(effect, shooterContext);
-    //    _awaiting = false;
-    //}
+    public void NotifySelected()
+    {
+        _awaitingSelection = false;
+    }
 }

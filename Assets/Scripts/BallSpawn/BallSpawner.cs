@@ -130,11 +130,13 @@ public class BallSpawner : MonoBehaviour
 
     private IEnumerator NextWaveDelayAndSpawn()
     {
-        // wait for configured delay
-        yield return new WaitForSeconds(waitBetweenWaves);
+       
 
         if ((CurrentWave % Mathf.Max(1, wavesPerGroup) == 0))
             yield return cardmanager.GetComponent<CardManager>().ShowAndWaitSelection();
+
+        // wait for configured delay
+        yield return new WaitForSeconds(3f);
 
         // increment wave and spawn next
         CurrentWave++;

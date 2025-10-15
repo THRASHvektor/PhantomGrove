@@ -145,7 +145,6 @@ MonoBehaviour:
   selectedMaterial: {fileID: 2100000, guid: 23b284ef74782084baf9fb182eb5cee4, type: 2}
   selectedPartical: {fileID: 3774992573087757170, guid: 02ab03e05ab7380488042f395a24dfad, type: 3}
   isSelect: 0
-  destroyDelay: 3
   cardText: {fileID: 6706732226852522590}
   Text: abc
 --- !u!1 &4618406796640446880

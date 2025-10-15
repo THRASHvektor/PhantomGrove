@@ -23,9 +23,9 @@ public class Card : MonoBehaviour
     // Start is called before the first frame update
 
     private CardManager _manager;
-    private CardEffectType _effect; 
-    private bool _selected = false;
-    private bool isHit = false;
+    private CardEffectType _effect;
+    private float cardDestroyTime = 3f;
+
 
     public void Initialize(CardManager manager, CardEffectType effect)
     {
@@ -34,16 +34,16 @@ public class Card : MonoBehaviour
         switch (_effect)
         {
             case CardEffectType.DoubleShot:
-                cardText.text = "Double Shot +5%";
+                cardText.text = new string("Double Shot +5%");
                 break;
             case CardEffectType.FireRate:
-                cardText.text = "Fire Rate +5%";
+                cardText.text = new string("Fire Rate +5%");
                 break;
             case CardEffectType.BulletSpeed:
-                cardText.text = "Bullet Speed +5%";
+                cardText.text = new string("Bullet Speed +5%");
                 break;
             case CardEffectType.PlayerHP:
-                cardText.text = "Player HP +10";
+                cardText.text = new string("Player HP +10");
                 break;
         }
 
@@ -80,32 +80,12 @@ public class Card : MonoBehaviour
         objectRenderer.material = original;
     }
 
-    // Update is called once per frame
-    //void Update()
-    //{
-    //    if (Input.GetMouseButtonDown(0))
-    //    {
-    //        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-    //        RaycastHit hit;
-    //        if (Physics.Raycast(ray, out hit))
-    //        {
-    //            // 检查是否击中了当前物体
-    //            if (hit.collider.gameObject == gameObject)//这个if下面的语句才是选中卡牌后执行的函数 上面的语句需要修改选中逻辑
-    //            {
-    //                //manager.OnCardClicked(this);
-    //                objectRenderer.material = selectedMaterial;
-    //                ParticleSystem effect = Instantiate(selectedPartical, transform);
-    //                Destroy(gameObject, 6f);
-    //            }
-    //        }
-    //    }
-    //}
 
     void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.CompareTag("Bullet"))
         {
-            _selected = true;
+            
             var shooter = collision.gameObject.GetComponent<BulletBehavior>().shooter.GetComponent<M1911>();
             switch (_effect)
             {
@@ -126,8 +106,9 @@ public class Card : MonoBehaviour
                     break;
             }
             Debug.Log($"Card selected => {_effect}");
-            
+            _manager.NotifySelected();
         }
+        
         DestroyCard();
     }
 
