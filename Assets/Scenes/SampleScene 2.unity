@@ -184,10 +184,12 @@ MonoBehaviour:
   - {fileID: 1768762503}
   - {fileID: 488349109}
   baseCount: 3
-  wavesPerGroup: 1
+  wavesPerGroup: 3
   increasePerGroup: 1
-  waitBetweenWaves: 2
+  waitBetweenWaves: 5
   spawnRadius: 0.5
+  monsterHP: 30
+  monsterIncreaseHP: 10
   playerTransform: {fileID: 1829846446}
   cardmanager: {fileID: 1694645896}
 --- !u!4 &256152576
