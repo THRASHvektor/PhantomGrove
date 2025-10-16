@@ -82,7 +82,22 @@ public class M1911 : MonoBehaviour
     /// <summary>
     /// Delay in seconds between the first and second bullet when double-shot triggers.
     /// </summary>
-    public float doubleShotDelay = 0.1f; 
+    public float doubleShotDelay = 0.1f;
+
+    [Header("FrostShot")]
+    /// <summary>
+    /// Probability (0..1) that a fired shot will trigger a frost shot to slow enemy down.
+    /// </summary>
+    [Range(0f, 1f)]
+    public float frostShotChance = 0.05f;
+    /// <summary>
+    /// Frost slow time for enemy which is shotted by frost bullet.
+    /// </summary>
+    public float frostTime = 2f;
+    /// <summary>
+    /// Speed slow rate for frost enemy.
+    /// </summary>
+    public float speedSlowRate = 0.1f;
 
     private Interactable interactable;
     private Animator animator;
@@ -90,8 +105,9 @@ public class M1911 : MonoBehaviour
 
     private RigidbodyConstraints originalConstraints;
     private bool originalUseGravity;
-    private bool savedConstraints = false;
     private Dictionary<Collider, bool> originalIsTrigger = new Dictionary<Collider, bool>();
+
+    private bool savedConstraints;
 
 
     /// <summary>
@@ -133,6 +149,7 @@ public class M1911 : MonoBehaviour
                     {
                         //  Schedule second shot after delay, but don't allow second shot to bypass cooldown:
                         StartCoroutine(DoDoubleShotAfterDelay(source, doubleShotDelay));
+                        Debug.Log("Double Shotted!");
                     }
 
                     SetNextAllowedForSource(source, now + (1f / Mathf.Max(0.0001f, roundsPerSecond)));
@@ -169,7 +186,15 @@ public class M1911 : MonoBehaviour
         {
             // Bind current gun to this bullet for further use, e.g. fire rate change.
             bb.shooter = this.gameObject;
-            bb.hittableLayers = LayerMask.GetMask("Enemy", "Default","World"); // 示例：击中敌人和地面会触发销毁
+            bb.hittableLayers = LayerMask.GetMask("Enemy", "Default","World"); 
+
+            // Frost Bullet Decision.
+            if(Random.value <= frostShotChance)
+            {
+                bb.isFrostBullet = true;
+                bb.InitFrostBullet(frostTime,speedSlowRate);
+                Debug.Log("Frost Bullet Shotted!");
+            }
         }
         Destroy(bulletInstance, bulletLifetime);
 
@@ -190,6 +215,8 @@ public class M1911 : MonoBehaviour
             animator.Play("Fire", 0, 0f);
         }
     }
+
+   
 
     /// <summary>
     /// Instantiate and eject a casing from the casing exit transform.

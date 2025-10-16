@@ -97,7 +97,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3625037896966406280, guid: 9e0ef2cf9cfc11c46bbe7f28b272f6fb, type: 3}
       propertyPath: m_TagString
-      value: Bullet
+      value: Untagged
       objectReference: {fileID: 0}
     - target: {fileID: 8535412081993147290, guid: 9e0ef2cf9cfc11c46bbe7f28b272f6fb, type: 3}
       propertyPath: m_RootOrder
@@ -177,5 +177,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   impactPrefab: {fileID: 0}
+  hittableLayers:
+    serializedVersion: 2
+    m_Bits: 0
   lifetime: 5
   damage: 10
+  shooter: {fileID: 0}
+  isFrostBullet: 0

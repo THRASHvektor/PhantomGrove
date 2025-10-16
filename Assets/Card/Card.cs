@@ -5,32 +5,46 @@ using UnityEngine;
 
 public class Card : MonoBehaviour
 {
+
     public Material original;
     public Material selectedMaterial;
     public ParticleSystem selectedPartical;
     public bool isSelect = false;
     public TextMeshPro cardText;
     public string Text;
+    /// <summary>
+    /// Card effect type affect on weapon, player.
+    /// </summary>
     public enum CardEffectType { DoubleShot, FireRate, BulletSpeed, PlayerHP }
 
-    
-
-    
 
     private Renderer objectRenderer;
     private Animator animator;
     private CardManager manager;
     // Start is called before the first frame update
-
+    /// <summary>
+    /// Parent CardManager.
+    /// </summary>
     private CardManager _manager;
+    /// <summary>
+    /// Card Effect.
+    /// </summary>
     private CardEffectType _effect;
+    /// <summary>
+    /// Card destory time (default in 3s).
+    /// </summary>
     private float cardDestroyTime = 3f;
 
-
+    /// <summary>
+    /// Initialize Card instance
+    /// </summary>
+    /// <param name="manager">Card's parent CardManager </param>
+    /// <param name="effect">Card's effect</param>
     public void Initialize(CardManager manager, CardEffectType effect)
     {
         _manager = manager;
         _effect = effect;
+        // Text display on Card.
         switch (_effect)
         {
             case CardEffectType.DoubleShot:
@@ -60,16 +74,22 @@ public class Card : MonoBehaviour
     //    cardText.text = Text;
     //}
 
-    public void DestroyCard() //未选中的卡牌 淡出销毁函数
+    /// <summary>
+    /// Card destory and animator play.
+    /// </summary>
+    public void DestroyCard() 
     {
-        Destroy(gameObject, 3f);
+        Destroy(gameObject, cardDestroyTime);
         StartFadeOut();
     }
-
+    /// <summary>
+    /// Fade animator play.
+    /// </summary>
     void StartFadeOut()  //淡出动画的trigger
     {
         animator.SetTrigger("FadeOut");
     }
+
     void Start()
     {
         //RandomCardText();
@@ -80,10 +100,13 @@ public class Card : MonoBehaviour
         objectRenderer.material = original;
     }
 
-
+    /// <summary>
+    /// Detect Bullet collsion event.
+    /// </summary>
+    /// <param name="collision"></param>
     void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.CompareTag("Bullet"))
+        if (collision.gameObject.GetComponent<BulletBehavior>())
         {
             
             var shooter = collision.gameObject.GetComponent<BulletBehavior>().shooter.GetComponent<M1911>();

@@ -23,11 +23,23 @@ public class BulletBehavior : MonoBehaviour
     /// Bullet belongins.
     /// </summary>
     public GameObject shooter;
+    /// <summary>
+    /// Status for Frost Bullet.
+    /// </summary>
+    public bool isFrostBullet = false;
+    public float frostTime = 2f;
+    public float speedSlowRate = 0.1f;
 
 
     void OnCollisionEnter(Collision collision)
     {
         HandleHit(collision.collider, collision.contacts.Length > 0 ? collision.contacts[0].point : (Vector3?)null);
+    }
+    
+    public void InitFrostBullet(float frostTime, float speedSlowRate)
+    {
+        this.frostTime = frostTime;
+        this.speedSlowRate = speedSlowRate;
     }
 
     private void HandleHit(Collider other, Vector3? hitPoint)
@@ -43,4 +55,5 @@ public class BulletBehavior : MonoBehaviour
         }
 
     }
+
 }

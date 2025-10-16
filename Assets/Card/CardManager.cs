@@ -6,18 +6,29 @@ using static Card;
 
 public class CardManager : MonoBehaviour
 {
-    [Tooltip("卡牌摆放点（CardPoint 子物件）")] 
+    /// <summary>
+    /// List to store card spawn points.
+    /// </summary>
+    [Tooltip("Card point spawn location")] 
     public List<Transform> cardPoints = new List<Transform>();
-
-    [Tooltip("卡牌预制体（预制体需带 CardBehaviour 组件）")]
+    /// <summary>
+    /// Card Prefab.
+    /// </summary>
+    [Tooltip("Card Prefab (Must contain CardBehavior component)")]
     public GameObject cardPrefabs;
-
-    // 选中卡牌时派发（解耦点：外部决定如何处理效果）
-    //public event Action<CardEffectSO> OnCardSelected;
-
+    /// <summary>
+    /// Store the Cards that the manange spawn.
+    /// </summary>
     private readonly List<GameObject> _spawnedCards = new List<GameObject>();
+    /// <summary>
+    /// Status for checking card selection.
+    /// </summary>
     private bool _awaitingSelection = false;
 
+    /// <summary>
+    /// Card selection phase.
+    /// </summary>
+    /// <returns></returns>
     public IEnumerator ShowAndWaitSelection()
     {
         if (cardPoints.Count == 0 || cardPrefabs == null)
@@ -26,7 +37,7 @@ public class CardManager : MonoBehaviour
             yield break;
         }
 
-        // 随机不重复选择卡面
+        
         List<CardEffectType> all = new List<CardEffectType>
     {
         CardEffectType.DoubleShot,
@@ -61,6 +72,7 @@ public class CardManager : MonoBehaviour
         _awaitingSelection = true;
         while (_awaitingSelection)
             yield return null;
+
 
         // 清理未被选中的卡（选中的卡通常在行为里会自毁，这里统一兜底清理）
         ClearCards();
