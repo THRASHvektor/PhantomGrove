@@ -54,7 +54,7 @@ public class BallSpawner : MonoBehaviour
             Debug.LogError("No spawn points.");
             return;
         }
-        if(cardmanager == null)
+        if (cardmanager == null)
         {
             return;
         }
@@ -132,7 +132,7 @@ public class BallSpawner : MonoBehaviour
 
     private IEnumerator NextWaveDelayAndSpawn()
     {
-       
+
         // Enter Card selection after a group wave.
         if ((CurrentWave % Mathf.Max(1, wavesPerGroup) == 0))
             yield return cardmanager.GetComponent<CardManager>().ShowAndWaitSelection();
