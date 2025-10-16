@@ -32,10 +32,16 @@ public class BallSpawner : MonoBehaviour
     [Tooltip("Random spawn radius around each spawn point (0 = exact transform).")]
     public float spawnRadius = 0.5f;
 
+    [Tooltip("Monster Health (default in 30).")]
+    public float monsterHP = 30f;
+    [Tooltip("Monster Health increasment after wave group (default in 30).")]
+    public float monsterIncreaseHP = 10f;
     public int CurrentWave { get; private set; } = 1;
 
     private int remainingBalls = 0;
     private bool waveInProgress = false;
+
+    
 
     public Transform playerTransform;
 
@@ -118,8 +124,8 @@ public class BallSpawner : MonoBehaviour
             if (tb != null)
             {
                 tb.SetSpawner(this);
-                tb.currentHealth = 30f;
-                tb.maxHealth = 30f;
+                tb.currentHealth = monsterHP;
+                tb.maxHealth = monsterHP;
             }
             else
             {
@@ -135,7 +141,10 @@ public class BallSpawner : MonoBehaviour
        
         // Enter Card selection after a group wave.
         if ((CurrentWave % Mathf.Max(1, wavesPerGroup) == 0))
+        {
             yield return cardmanager.GetComponent<CardManager>().ShowAndWaitSelection();
+            monsterHP += monsterIncreaseHP;
+        }
 
         // wait for configured delay
         yield return new WaitForSeconds(3f);
