@@ -52,6 +52,7 @@ public class TargetBall : MonoBehaviour
 
     private float frostExpireTime;
     private Coroutine frostCo;
+    private Coroutine hitCo;
 
     void Awake()
     {
@@ -166,6 +167,14 @@ public class TargetBall : MonoBehaviour
         // 先直接应用伤害（同步），协程只做视觉/延时销毁
         ApplyDamageImmediate(bb);
         Debug.Log("Current HP: "+currentHealth);
+
+        var now = Time.time;
+        for (int i = 0; i < renderers.Length; i++)
+        {
+            if (renderers[i] != null && renderers[i].material.HasProperty("_Color"))
+                renderers[i].material.color = hitColor;
+        }
+        hitCo = StartCoroutine(HitFeedbackRoutine());
         //StartCoroutine(HitFeedbackCoroutine(c.contacts.Length > 0 ? (Vector3?)c.contacts[0].point : null));
     }
 
@@ -221,6 +230,18 @@ public class TargetBall : MonoBehaviour
             StopCoroutine(frostCo);
         }
         frostCo = StartCoroutine(FrostRoutine());
+    }
+
+    private IEnumerator HitFeedbackRoutine()
+    {
+        yield return new WaitForSeconds(0.5f);
+
+        for (int i = 0; i < renderers.Length; i++)
+        {
+            if (renderers[i] != null && renderers[i].material.HasProperty("_Color"))
+                renderers[i].material.color = originalColors[i];
+        }
+        hitCo = null;
     }
 
     private IEnumerator FrostRoutine() 
