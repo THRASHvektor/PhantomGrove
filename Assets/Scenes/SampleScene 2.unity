@@ -184,11 +184,11 @@ MonoBehaviour:
   - {fileID: 1768762503}
   - {fileID: 488349109}
   baseCount: 3
-  wavesPerGroup: 3
+  wavesPerGroup: 2
   increasePerGroup: 1
   waitBetweenWaves: 5
   spawnRadius: 0.5
-  monsterHP: 10
+  monsterHP: 20
   monsterIncreaseHP: 10
   playerTransform: {fileID: 1829846446}
   cardmanager: {fileID: 1694645896}
@@ -1576,9 +1576,9 @@ MonoBehaviour:
   roundsPerSecond: 5
   doubleShotChance: 0
   doubleShotDelay: 0.1
-  frostShotChance: 0
+  frostShotChance: 1
   frostTime: 2
-  speedSlowRate: 0.1
+  speedSlowRate: 1
 --- !u!114 &1705905720
 MonoBehaviour:
   m_ObjectHideFlags: 0
