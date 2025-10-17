@@ -52,15 +52,18 @@ public class TargetBall : MonoBehaviour
 
     private float frostExpireTime;
     private Coroutine frostCo;
+    private Coroutine forstFeedbackCo;
     private Coroutine hitCo;
 
     // 存储初始移动速度
     private float originalMoveSpeed;
 
+    private MonsterChase monsterChase;
+
     void Awake()
     {
         // 存储初始移动速度
-        MonsterChase monsterChase = GetComponent<MonsterChase>();
+         monsterChase = GetComponent<MonsterChase>();
         if (monsterChase != null)
         {
             originalMoveSpeed = monsterChase.moveSpeed;
@@ -181,20 +184,15 @@ public class TargetBall : MonoBehaviour
         var bb = c.gameObject.GetComponent<BulletBehavior>();
         if (bb == null) return;
 
-        // 极短冷却，避免同帧重复判定导致抖动，又不影响快速连发
+        
         if (Time.time - lastHitTime < 0.01f) return;
         lastHitTime = Time.time;
 
-        // 先直接应用伤害（同步），协程只做视觉/延时销毁
+        
         ApplyDamageImmediate(bb);
         Debug.Log("Current HP: " + currentHealth);
 
-        // 视觉反馈
-        for (int i = 0; i < renderers.Length; i++)
-        {
-            if (renderers[i] != null && renderers[i].material.HasProperty("_Color"))
-                renderers[i].material.color = hitColor;
-        }
+        
 
         if (hitCo != null) StopCoroutine(hitCo);
         hitCo = StartCoroutine(HitFeedbackRoutine());
@@ -205,7 +203,12 @@ public class TargetBall : MonoBehaviour
         currentHealth -= bb.damage;
 
         // Frost Shot decision
-        if (bb.isFrostBullet) ApplyOrRefreshFrost(bb.frostTime, bb.speedSlowRate);
+        if (bb.isFrostBullet) 
+        {
+            ApplyOrRefreshFrost(bb.frostTime, bb.speedSlowRate);
+            
+        }
+        
 
         UpdateHealthBar();
 
@@ -236,78 +239,96 @@ public class TargetBall : MonoBehaviour
     public void ApplyOrRefreshFrost(float frostTime, float speedSlowRate)
     {
         var now = Time.time;
-        if (isFrost)
-        {
-            if (frostTime > 0f)
-            {
-                frostExpireTime = now + frostTime;
-            }
-            return;
-        }
+        // 每次调用都按本次激活时间重算过期时间
+        frostExpireTime = now + Mathf.Max(0f, frostTime);
+
 
         isFrost = true;
-        MonsterChase monsterChase = GetComponent<MonsterChase>();
+
+        // 应用减速
         if (monsterChase != null)
         {
             monsterChase.moveSpeed = originalMoveSpeed * (1f - speedSlowRate);
         }
 
-        // 颜色改为冰冻色
-        for (int i = 0; i < renderers.Length; i++)
-        {
-            if (renderers[i] != null && renderers[i].material.HasProperty("_Color"))
-                renderers[i].material.color = frostColor;
-        }
-
-        frostExpireTime = now + frostTime;
         if (frostCo != null)
-        {
             StopCoroutine(frostCo);
-        }
+
         frostCo = StartCoroutine(FrostRoutine());
+        if (forstFeedbackCo != null)
+            StopCoroutine(forstFeedbackCo);
+        forstFeedbackCo = StartCoroutine(FrostFeedbackRoutine());
+
+
     }
 
-    private IEnumerator HitFeedbackRoutine()
+    private IEnumerator FrostFeedbackRoutine() 
     {
-        yield return new WaitForSeconds(hitColorShowTime);
-
-        // 如果不是冰冻状态，恢复原色
-        if (!isFrost)
+        while (hitCo != null)
+            yield return null;
+        
+        // 设置为冰冻色（如果此时仍在冰冻状态）
+        if (isFrost)
         {
             for (int i = 0; i < renderers.Length; i++)
             {
                 if (renderers[i] != null && renderers[i].material.HasProperty("_Color"))
-                    renderers[i].material.color = originalColors[i];
+                    renderers[i].material.color = frostColor;
             }
+            Debug.Log("Frost Color Apply");
         }
-        hitCo = null;
-    }
 
-    private IEnumerator FrostRoutine()
-    {
-        while (Time.time < frostExpireTime)
-        {
+        // 等待冰冻时间结束
+        while (isFrost)
             yield return null;
-        }
 
-        isFrost = false;
-
-        // 恢复原色
         for (int i = 0; i < renderers.Length; i++)
         {
             if (renderers[i] != null && renderers[i].material.HasProperty("_Color"))
                 renderers[i].material.color = originalColors[i];
         }
+        forstFeedbackCo = null;
+    }
+
+
+    private IEnumerator FrostRoutine()
+    {
+        Debug.Log("Enable Frost");
+        // 等待冰冻时间结束
+        while (Time.time < frostExpireTime)
+            yield return null;
+
+        // 结束冰冻
+        isFrost = false;
 
         // 恢复移动速度
-        MonsterChase monsterChase = GetComponent<MonsterChase>();
         if (monsterChase != null)
         {
             monsterChase.moveSpeed = originalMoveSpeed;
         }
-
         frostCo = null;
+        Debug.Log("Disable Frost");
     }
+
+    private IEnumerator HitFeedbackRoutine()
+    { // 视觉反馈（受击变色）
+      for (int i = 0; i < renderers.Length; i++) 
+        { 
+            if (renderers[i] != null && renderers[i].material.HasProperty("_Color")) 
+                renderers[i].material.color = hitColor; 
+        } 
+        yield return new WaitForSeconds(hitColorShowTime);
+
+        // 恢复原色（这里按你原逻辑恢复为 originalColors）
+        for (int i = 0; i < renderers.Length; i++)
+        {
+            if (renderers[i] != null && renderers[i].material.HasProperty("_Color"))
+                renderers[i].material.color = originalColors[i];
+        }
+        hitCo = null;
+    }
+
+
 
     /// <summary>
     /// Method to directly set health for testing or special effects.
