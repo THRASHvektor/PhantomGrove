@@ -52,7 +52,7 @@
     {
       "name": "/actions/default/in/TouchPad",
       "type": "vector2",
-      "requirement": "mandatory"
+      "requirement": "suggested"
     },
     {
       "name": "/actions/default/in/turn",

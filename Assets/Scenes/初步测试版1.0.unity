@@ -6484,6 +6484,18 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: -3.343
       objectReference: {fileID: 0}
+    - target: {fileID: 4748351540627503560, guid: 11453e2ce9bf9134381242cfc38eba68, type: 3}
+      propertyPath: logInputEverySecond
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4748351540627503560, guid: 11453e2ce9bf9134381242cfc38eba68, type: 3}
+      propertyPath: moveAction.actionPath
+      value: /actions/default/in/TouchPad
+      objectReference: {fileID: 0}
+    - target: {fileID: 4748351540627503560, guid: 11453e2ce9bf9134381242cfc38eba68, type: 3}
+      propertyPath: turnAction.actionPath
+      value: /actions/default/in/turn
+      objectReference: {fileID: 0}
     - target: {fileID: 8146321497173041211, guid: 11453e2ce9bf9134381242cfc38eba68, type: 3}
       propertyPath: m_Enabled
       value: 0
