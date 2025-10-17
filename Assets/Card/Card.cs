@@ -73,6 +73,7 @@ public class Card : MonoBehaviour
             case CardEffectType.FrostTime:
                 break;
             case CardEffectType.Damage:
+                cardText.text = new string("Bullet Damage + 5");
                 break;
         }
 
@@ -164,6 +165,10 @@ public class Card : MonoBehaviour
                 case CardEffectType.PlayerHP:
                     //Todo: Player effect affect.
                     break;
+                case CardEffectType.Damage:
+                    if (shooter != null) shooter.IncreaseBulletDamge(5f);
+                    break;
+
             }
             objectRenderer.material = selectedMaterial;
             ParticleSystem effect = Instantiate(selectedPartical, transform);

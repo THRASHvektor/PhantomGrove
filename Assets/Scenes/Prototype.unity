@@ -6514,6 +6514,10 @@ PrefabInstance:
       value: Player_Phantom
       objectReference: {fileID: 0}
     - target: {fileID: 447954, guid: 11453e2ce9bf9134381242cfc38eba68, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 447954, guid: 11453e2ce9bf9134381242cfc38eba68, type: 3}
       propertyPath: m_LocalPosition.x
       value: -2.12
       objectReference: {fileID: 0}
@@ -6523,7 +6527,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 447954, guid: 11453e2ce9bf9134381242cfc38eba68, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 11.75
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 447954, guid: 11453e2ce9bf9134381242cfc38eba68, type: 3}
       propertyPath: m_LocalRotation.w
@@ -6579,6 +6583,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2014920, guid: 11453e2ce9bf9134381242cfc38eba68, type: 3}
       propertyPath: m_projectionMatrixMode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2849745782626623243, guid: 11453e2ce9bf9134381242cfc38eba68, type: 3}
+      propertyPath: m_Height
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4748351540627503560, guid: 11453e2ce9bf9134381242cfc38eba68, type: 3}
@@ -13026,7 +13034,7 @@ MonoBehaviour:
   roundsPerSecond: 5
   doubleShotChance: 0
   doubleShotDelay: 0.1
-  frostShotChance: 1
+  frostShotChance: 0
   frostTime: 2
   speedSlowRate: 1
 --- !u!65 &1652693036

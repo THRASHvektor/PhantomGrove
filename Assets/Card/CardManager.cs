@@ -44,7 +44,8 @@ public class CardManager : MonoBehaviour
         CardEffectType.DoubleShot,
         CardEffectType.FireRate,
         CardEffectType.BulletSpeed,
-        CardEffectType.PlayerHP
+        //CardEffectType.PlayerHP
+        CardEffectType.Damage,
     };
         Shuffle(all);
 
