@@ -2,19 +2,15 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
-/// <summary>
-/// Ball behaviour for being hit by bullets.
-/// On hit: briefly change color for visual feedback, notify spawner, then destroy when health reaches zero.
-/// </summary>
 [RequireComponent(typeof(Collider))]
 public class TargetBall : MonoBehaviour
 {
     [Header("Health Settings")]
     [Tooltip("Maximum health points for the ball.")]
-    public float maxHealth = 30f;
+    public float maxHealth = 50f;
 
     [Tooltip("Current health points.")]
-    public float currentHealth = 30f;
+    public float currentHealth = 50f;
 
     [Header("Visual Feedback")]
     [Tooltip("Color to flash when hit.")]
@@ -37,6 +33,9 @@ public class TargetBall : MonoBehaviour
     [Tooltip("Height of the health bar.")]
     public float healthBarHeight = 0.3f;
 
+    [Header("Health Bar Gradient")]
+    public Gradient healthBarGradient; // 在Inspector里设置渐变色
+
     private Renderer[] renderers;
     private Color[] originalColors;
     private bool isHit = false;
@@ -47,6 +46,7 @@ public class TargetBall : MonoBehaviour
     private Canvas healthBarCanvas;
     private Image healthBarFill;
     private RectTransform healthBarFillRect;
+    private Image healthBarBG; // 新增：血条背景
 
     private float lastHitTime = 0f;
 
@@ -54,8 +54,18 @@ public class TargetBall : MonoBehaviour
     private Coroutine frostCo;
     private Coroutine hitCo;
 
+    // 存储初始移动速度
+    private float originalMoveSpeed;
+
     void Awake()
     {
+        // 存储初始移动速度
+        MonsterChase monsterChase = GetComponent<MonsterChase>();
+        if (monsterChase != null)
+        {
+            originalMoveSpeed = monsterChase.moveSpeed;
+        }
+
         // Initialize renderers and original colors
         renderers = GetComponentsInChildren<Renderer>(true);
         originalColors = new Color[renderers.Length];
@@ -95,14 +105,23 @@ public class TargetBall : MonoBehaviour
         RectTransform canvasRect = canvasGO.GetComponent<RectTransform>();
         canvasRect.sizeDelta = new Vector2(healthBarWidth, healthBarHeight);
 
-        // Create health fill - single red bar that shrinks from right to left
+        // Create background
+        GameObject bgGO = new GameObject("HealthBarBG");
+        bgGO.transform.SetParent(canvasGO.transform, false);
+        healthBarBG = bgGO.AddComponent<Image>();
+        healthBarBG.color = new Color(0, 0, 0, 0.5f); // 半透明黑色
+        RectTransform bgRect = bgGO.GetComponent<RectTransform>();
+        bgRect.anchorMin = Vector2.zero;
+        bgRect.anchorMax = Vector2.one;
+        bgRect.sizeDelta = Vector2.zero;
+        bgRect.localPosition = Vector3.zero;
+
+        // Create health fill - 删除长度变化，只保留颜色渐变
         GameObject fillGO = new GameObject("HealthBarFill");
-        fillGO.transform.SetParent(canvasGO.transform);
+        fillGO.transform.SetParent(bgGO.transform, false);
         healthBarFill = fillGO.AddComponent<Image>();
-        healthBarFill.color = Color.red;
-        healthBarFill.type = Image.Type.Filled;
-        healthBarFill.fillMethod = Image.FillMethod.Horizontal;
-        healthBarFill.fillOrigin = 0; // Fill from left to right
+        // 删除填充类型设置，使用普通图片
+        healthBarFill.type = Image.Type.Simple;
 
         healthBarFillRect = fillGO.GetComponent<RectTransform>();
         healthBarFillRect.anchorMin = Vector2.zero;
@@ -124,17 +143,17 @@ public class TargetBall : MonoBehaviour
     {
         if (healthBarFill != null)
         {
-            float healthPercent = (float)currentHealth / maxHealth;
-            healthBarFill.fillAmount = healthPercent;
+            float healthPercent = Mathf.Clamp01(currentHealth / maxHealth);
 
-            // Change color based on health percentage
-            if (healthPercent > 0.6f)
-                healthBarFill.color = Color.green;
-            else if (healthPercent > 0.3f)
-                healthBarFill.color = Color.yellow;
+            // 删除血条长度变化，只设置颜色渐变
+            if (healthBarGradient != null)
+                healthBarFill.color = healthBarGradient.Evaluate(healthPercent);
             else
-                healthBarFill.color = Color.red;
+                healthBarFill.color = Color.Lerp(Color.red, Color.green, healthPercent);
         }
+
+        // 实时输出血量
+        Debug.Log($"[{gameObject.name}] HP: {currentHealth}/{maxHealth}");
     }
 
     /// <summary>
@@ -159,35 +178,37 @@ public class TargetBall : MonoBehaviour
     // Accept both collision and trigger depending on bullet setup
     void OnCollisionEnter(Collision c)
     {
-        var bb = c.gameObject.GetComponent<BulletBehavior>(); if (bb == null) return;
+        var bb = c.gameObject.GetComponent<BulletBehavior>();
+        if (bb == null) return;
 
         // 极短冷却，避免同帧重复判定导致抖动，又不影响快速连发
         if (Time.time - lastHitTime < 0.01f) return;
         lastHitTime = Time.time;
+
         // 先直接应用伤害（同步），协程只做视觉/延时销毁
         ApplyDamageImmediate(bb);
-        Debug.Log("Current HP: "+currentHealth);
+        Debug.Log("Current HP: " + currentHealth);
 
-        var now = Time.time;
+        // 视觉反馈
         for (int i = 0; i < renderers.Length; i++)
         {
             if (renderers[i] != null && renderers[i].material.HasProperty("_Color"))
                 renderers[i].material.color = hitColor;
         }
+
+        if (hitCo != null) StopCoroutine(hitCo);
         hitCo = StartCoroutine(HitFeedbackRoutine());
-        //StartCoroutine(HitFeedbackCoroutine(c.contacts.Length > 0 ? (Vector3?)c.contacts[0].point : null));
     }
-
-
 
     void ApplyDamageImmediate(BulletBehavior bb)
     {
         currentHealth -= bb.damage;
-        
+
         // Frost Shot decision
         if (bb.isFrostBullet) ApplyOrRefreshFrost(bb.frostTime, bb.speedSlowRate);
 
         UpdateHealthBar();
+
         // Monster Death Decision
         if (currentHealth <= 0)
         {
@@ -200,30 +221,44 @@ public class TargetBall : MonoBehaviour
             if (spawner != null)
                 spawner.NotifyBallDestroyed(this);
             // Destroy this ball
-            Destroy(gameObject,1f);
+            Destroy(gameObject, 1f);
+        }
+        else
+        {
+            // 显示血条
+            if (healthBarCanvas != null)
+            {
+                healthBarCanvas.gameObject.SetActive(true);
+            }
         }
     }
 
     public void ApplyOrRefreshFrost(float frostTime, float speedSlowRate)
-    { // 如果已冰冻，刷新到新的过期时间
+    {
         var now = Time.time;
-        if (isFrost) 
-        { 
+        if (isFrost)
+        {
             if (frostTime > 0f)
             {
                 frostExpireTime = now + frostTime;
-
             }
             return;
         }
+
         isFrost = true;
-        gameObject.GetComponent<MonsterChase>().moveSpeed *= (1f - speedSlowRate);
+        MonsterChase monsterChase = GetComponent<MonsterChase>();
+        if (monsterChase != null)
+        {
+            monsterChase.moveSpeed = originalMoveSpeed * (1f - speedSlowRate);
+        }
+
         // 颜色改为冰冻色
         for (int i = 0; i < renderers.Length; i++)
         {
             if (renderers[i] != null && renderers[i].material.HasProperty("_Color"))
                 renderers[i].material.color = frostColor;
         }
+
         frostExpireTime = now + frostTime;
         if (frostCo != null)
         {
@@ -234,133 +269,44 @@ public class TargetBall : MonoBehaviour
 
     private IEnumerator HitFeedbackRoutine()
     {
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(hitColorShowTime);
 
-        for (int i = 0; i < renderers.Length; i++)
+        // 如果不是冰冻状态，恢复原色
+        if (!isFrost)
         {
-            if (renderers[i] != null && renderers[i].material.HasProperty("_Color"))
-                renderers[i].material.color = originalColors[i];
-        }
-        hitCo = null;
-    }
-
-    private IEnumerator FrostRoutine() 
-    {
-        while (Time.time < frostExpireTime)
-        {
-            yield return null;
-        }
-        isFrost = false;
-
-        for (int i = 0; i < renderers.Length; i++)
-        {
-            if (renderers[i] != null && renderers[i].material.HasProperty("_Color"))
-                renderers[i].material.color = originalColors[i];
-        }
-
-        gameObject.GetComponent<MonsterChase>().moveSpeed = 1f; // 需要在 Awake/Start 存一下初始速度
-        frostCo = null;
-    }
-
-    private void HandleHit(GameObject other, Vector3? hitPoint)
-    {
-        if (isHit) return;
-
-        // Detect bullet either by BulletBehavior component or tag
-        BulletBehavior bb = other.GetComponent<BulletBehavior>();
-       if (bb != null)
-        {
-            StartCoroutine(TakeDamage(hitPoint, bb));
-        }
-    }
-
-    /// <summary>
-    /// Coroutine that handles taking damage, visual feedback, and destruction when health reaches zero.
-    /// </summary>
-    private IEnumerator TakeDamage(Vector3? hitPoint, BulletBehavior bb)
-    {
-        isHit = true;
-
-        // Show health bar when taking damage
-        if (healthBarCanvas != null)
-        {
-            healthBarCanvas.gameObject.SetActive(true);
-        }
-
-        // Spawn impact effect if any
-        if (impactPrefab != null && hitPoint.HasValue)
-        {
-            Instantiate(impactPrefab, hitPoint.Value, Quaternion.identity);
-        }
-
-        // Reduce health
-        currentHealth = currentHealth - bb.damage;
-        isHit = false;
-
-        //currentHealth--;
-        if (bb.isFrostBullet && !isFrost) 
-        {
-            StartCoroutine(AffectFrostBulletEffect(bb.frostTime, bb.speedSlowRate));
-        }
-
-        UpdateHealthBar();
-
-        // Flash hit color
-        for (int i = 0; i < renderers.Length; i++)
-        {
-            if (renderers[i] != null && renderers[i].material.HasProperty("_Color"))
-                renderers[i].material.color = hitColor;
-        }
-
-        if (hitColorShowTime > 0f)
-            yield return new WaitForSeconds(hitColorShowTime);
-
-        // Check if ball should be destroyed
-        if (currentHealth <= 0)
-        {
-            // Hide health bar on death
-            if (healthBarCanvas != null)
-            {
-                healthBarCanvas.gameObject.SetActive(false);
-            }
-
-            // Notify spawner BEFORE destroying (so spawner can decrement/track)
-            if (spawner != null)
-                spawner.NotifyBallDestroyed(this);
-
-            // Add a small delay before destruction for death effects
-            yield return new WaitForSeconds(0.1f);
-
-            // Destroy this ball
-            Destroy(gameObject);
-        }
-        else
-        {
-            // Restore original color if ball survives
             for (int i = 0; i < renderers.Length; i++)
             {
                 if (renderers[i] != null && renderers[i].material.HasProperty("_Color"))
                     renderers[i].material.color = originalColors[i];
             }
-
-            // Reset hit flag after recovery
-            isHit = false;
-
-            // Hide health bar after a moment if not dead
-            StartCoroutine(HideHealthBarAfterDelay(2f));
         }
+        hitCo = null;
     }
 
-    /// <summary>
-    /// Hides the health bar after a delay if the ball is still alive.
-    /// </summary>
-    private IEnumerator HideHealthBarAfterDelay(float delay)
+    private IEnumerator FrostRoutine()
     {
-        yield return new WaitForSeconds(delay);
-        if (healthBarCanvas != null && currentHealth > 0 && currentHealth == maxHealth)
+        while (Time.time < frostExpireTime)
         {
-            healthBarCanvas.gameObject.SetActive(false);
+            yield return null;
         }
+
+        isFrost = false;
+
+        // 恢复原色
+        for (int i = 0; i < renderers.Length; i++)
+        {
+            if (renderers[i] != null && renderers[i].material.HasProperty("_Color"))
+                renderers[i].material.color = originalColors[i];
+        }
+
+        // 恢复移动速度
+        MonsterChase monsterChase = GetComponent<MonsterChase>();
+        if (monsterChase != null)
+        {
+            monsterChase.moveSpeed = originalMoveSpeed;
+        }
+
+        frostCo = null;
     }
 
     /// <summary>
@@ -375,7 +321,6 @@ public class TargetBall : MonoBehaviour
         if (healthBarCanvas != null)
         {
             healthBarCanvas.gameObject.SetActive(true);
-            StartCoroutine(HideHealthBarAfterDelay(2f));
         }
     }
 
@@ -391,7 +336,6 @@ public class TargetBall : MonoBehaviour
         if (healthBarCanvas != null)
         {
             healthBarCanvas.gameObject.SetActive(true);
-            StartCoroutine(HideHealthBarAfterDelay(2f));
         }
     }
 
@@ -406,31 +350,5 @@ public class TargetBall : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Frost Bullet Effect.
-    /// </summary>
-    /// <param name="frostTime"></param>
-    /// <param name="speedSlowRate"></param>
-    /// <returns></returns>
-    public IEnumerator AffectFrostBulletEffect(float frostTime, float speedSlowRate)
-    {
-        var originSpeed = gameObject.GetComponent<MonsterChase>().moveSpeed;
-        gameObject.GetComponent<MonsterChase>().moveSpeed = originSpeed * (1f - speedSlowRate);
-        // Flash hit color
-        for (int i = 0; i < renderers.Length; i++)
-        {
-            if (renderers[i] != null && renderers[i].material.HasProperty("_Color"))
-                renderers[i].material.color = frostColor;
-        }
-        // wait for configured delay
-        yield return new WaitForSeconds(frostTime);
-        isFrost = false;
-        for (int i = 0; i < renderers.Length; i++)
-        {
-            if (renderers[i] != null && renderers[i].material.HasProperty("_Color"))
-                renderers[i].material.color = originalColors[i];
-        }
-        gameObject.GetComponent<MonsterChase>().moveSpeed = originSpeed;
-        
-    }
+
 }
