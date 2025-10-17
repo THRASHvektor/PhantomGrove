@@ -18,8 +18,8 @@ MonoBehaviour:
   actionsFilePath: actions.json
   steamVRInputPath: SteamVR_Input
   inputUpdateMode: 2
-  poseUpdateMode: 2
-  activateFirstActionSetOnStart: 0
+  poseUpdateMode: 8
+  activateFirstActionSetOnStart: 1
   editorAppKey: application.generated.unity.phantomvr.exe
   autoEnableVR: 1
   legacyMixedRealityCamera: 1
@@ -28,5 +28,5 @@ MonoBehaviour:
     needsReinit: 0
   mixedRealityCameraInputSource: 11
   mixedRealityActionSetAutoEnable: 1
-  previewHandLeft: {fileID: 1000013348574242, guid: 88fca65b1e2f67145b3af9d98a0f7841, type: 3}
-  previewHandRight: {fileID: 1000010304998954, guid: 6def53d002137b747aec0b29551e0e25, type: 3}
+  previewHandLeft: {fileID: 0}
+  previewHandRight: {fileID: 0}
