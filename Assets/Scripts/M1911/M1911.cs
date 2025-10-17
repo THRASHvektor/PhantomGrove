@@ -108,6 +108,7 @@ public class M1911 : MonoBehaviour
     private Dictionary<Collider, bool> originalIsTrigger = new Dictionary<Collider, bool>();
 
     private bool savedConstraints;
+    private float bulletDamage = 10f;
 
 
     /// <summary>
@@ -186,8 +187,8 @@ public class M1911 : MonoBehaviour
         {
             // Bind current gun to this bullet for further use, e.g. fire rate change.
             bb.shooter = this.gameObject;
-            bb.hittableLayers = LayerMask.GetMask("Enemy", "Default","World"); 
-
+            bb.hittableLayers = LayerMask.GetMask("Enemy", "Default","World");
+            bb.damage = bulletDamage;
             // Frost Bullet Decision.
             if(Random.value <= frostShotChance)
             {
@@ -360,6 +361,11 @@ public class M1911 : MonoBehaviour
     public void IncreaseFireRateByPercentage(float percentage)
     {
         SetFireRate(GetFireRate() * (1f + percentage));
+    }
+
+    public void IncreaseBulletDamge(float damage)
+    {
+        bulletDamage += damage;
     }
 
     // Called by SteamVR
