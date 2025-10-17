@@ -55,6 +55,10 @@
       "requirement": "mandatory"
     },
     {
+      "name": "/actions/default/in/turn",
+      "type": "vector2"
+    },
+    {
       "name": "/actions/default/out/Haptic",
       "type": "vibration"
     },

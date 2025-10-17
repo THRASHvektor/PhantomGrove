@@ -1,36 +1,94 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-/**
- * 佩戴在手腕上的手环，实时显示玩家HP，通过修改手环材质的_BlendPos属性实现
- * 此脚本挂载手环模型上
- * 推荐由事件系统通知HP更新
- */
+
 public class HPBracelet : MonoBehaviour
 {
-    private PlayerState playerState;
-    private Material braceletMaterial;
-    // Start is called before the first frame update
+    
+    public PlayerHealth playerHealth;   
+    public PlayerState playerState;    
+
+   
+    public Renderer braceletRenderer;  
+
+   
+    public string ratioProp = "_BlendPos";
+
+   
+    public bool pollEveryFrame = true;
+
+    private Material[] mats;
+    private int idRatio;
+
+    void Awake()
+    {
+        
+        if (!playerHealth) playerHealth = GetComponentInParent<PlayerHealth>() ?? FindObjectOfType<PlayerHealth>(true);
+        if (!playerState) playerState = GetComponentInParent<PlayerState>();
+
+        if (!braceletRenderer)
+            braceletRenderer = GetComponent<Renderer>() ?? GetComponentInChildren<Renderer>(true);
+
+      
+
+        mats = braceletRenderer.materials;  
+        idRatio = Shader.PropertyToID(ratioProp);
+    }
+
     void Start()
     {
-        // 获取玩家状态组件
-        playerState = GetComponentInParent<PlayerState>();
-        braceletMaterial = GetComponent<Renderer>().material;
-        braceletMaterial.SetFloat("_BlendPos", playerState.healthCurrent / playerState.healthMax);
-        // 订阅玩家状态变化事件
-        EventDispatcher<string>.addListener(GameEvents.Gameplay.Events.UpdateHPDisplay, UpdateHP);
+        ApplyRatio(GetHealthRatio());
+
+        EventDispatcher<string>.addListener(GameEvents.Gameplay.Events.UpdateHPDisplay, OnHPEvent);
     }
 
     void OnDestroy()
     {
-        // 取消订阅玩家状态变化事件
-        EventDispatcher<string>.removeListener(GameEvents.Gameplay.Events.UpdateHPDisplay, UpdateHP);
+        EventDispatcher<string>.removeListener(GameEvents.Gameplay.Events.UpdateHPDisplay, OnHPEvent);
     }
 
-    // Update is called once per frame
-    void UpdateHP(string empty)
+    void OnHPEvent(string _)
     {
-        braceletMaterial.SetFloat("_BlendPos", playerState.healthCurrent / playerState.healthMax);
+        ApplyRatio(GetHealthRatio());
+    }
+
+    void Update()
+    {
+        if (pollEveryFrame)
+            ApplyRatio(GetHealthRatio());
+    }
+
+    public void SetHealthRatio(float ratio01)
+    {
+        ApplyRatio(Mathf.Clamp01(ratio01));
+    }
+
+    float GetHealthRatio()
+    {
+        if (playerHealth)
+        {
+            float cur = playerHealth.currentHealth;
+            float max = Mathf.Max(1, playerHealth.maxHealth);
+            return Mathf.Clamp01(cur / max);
+        }
+        if (playerState)
+        {
+            float cur = (float)playerState.healthCurrent;
+            float max = Mathf.Max(0.0001f, (float)playerState.healthMax);
+            return Mathf.Clamp01(cur / max);
+        }
+        return 1f;
+    }
+
+  
+    void ApplyRatio(float ratio)
+    {
+        if (mats == null || mats.Length == 0) return;
+        for (int i = 0; i < mats.Length; i++)
+        {
+            var m = mats[i];
+            if (m && m.HasProperty(idRatio))
+                m.SetFloat(idRatio, ratio);
+        }
     }
 }
+

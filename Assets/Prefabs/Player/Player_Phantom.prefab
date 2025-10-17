@@ -229,6 +229,7 @@ GameObject:
   - component: {fileID: 8146321497173041211}
   - component: {fileID: 2849745782626623243}
   - component: {fileID: 4748351540627503560}
+  - component: {fileID: -155618605740760399}
   m_Layer: 9
   m_Name: Player_Phantom
   m_TagString: Untagged
@@ -337,10 +338,30 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 028dfa6eb3c691e4ea94762b6668ffeb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  turnAction:
+    actionPath: 
+    needsReinit: 0
+  turnHand: 2
+  turnSpeedDegPerSec: 180
+  turnDeadzone: 0.2
   input:
     actionPath: /actions/default/in/TouchPad
     needsReinit: 0
   speed: 2.5
+--- !u!114 &-155618605740760399
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 107946}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37686065bc6811a458450e65b1d2d735, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxHealth: 100
+  currentHealth: 0
 --- !u!1 &109154
 GameObject:
   m_ObjectHideFlags: 0
