@@ -72,10 +72,8 @@ public class CardManager : MonoBehaviour
 
         _awaitingSelection = true;
         while (_awaitingSelection)
-            yield return null;
-
-
-        // 清理未被选中的卡（选中的卡通常在行为里会自毁，这里统一兜底清理）
+            yield return null;     
+        
         ClearCards(clickedCard);
     }
 
@@ -92,17 +90,6 @@ public class CardManager : MonoBehaviour
         }
         _spawnedCards.Clear();
 
-    }
-
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 
     private void Shuffle<T>(List<T> list)

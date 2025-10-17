@@ -117,25 +117,25 @@ public class Card : MonoBehaviour
         objectRenderer = GetComponent<Renderer>();
     }
 
-    void Update()
-    {
-        if (Input.GetMouseButtonDown(0))
-        {
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
-            if (Physics.Raycast(ray, out hit))
-            {
-                // 检查是否击中了当前物体
-                if (hit.collider.gameObject == gameObject)//这个if下面的语句才是选中卡牌后执行的函数 上面的语句需要修改选中逻辑
-                {
-                    objectRenderer.material = selectedMaterial;
-                    ParticleSystem effect = Instantiate(selectedPartical, transform);
-                    Destroy(gameObject, 6f);
-                    _manager.NotifySelected(this);
-                }
-            }
-        }
-    }
+    //void Update()
+    //{
+    //    if (Input.GetMouseButtonDown(0))
+    //    {
+    //        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+    //        RaycastHit hit;
+    //        if (Physics.Raycast(ray, out hit))
+    //        {
+    //            // 检查是否击中了当前物体
+    //            if (hit.collider.gameObject == gameObject)//这个if下面的语句才是选中卡牌后执行的函数 上面的语句需要修改选中逻辑
+    //            {
+    //                objectRenderer.material = selectedMaterial;
+    //                ParticleSystem effect = Instantiate(selectedPartical, transform);
+    //                Destroy(gameObject, 6f);
+    //                _manager.NotifySelected(this);
+    //            }
+    //        }
+    //    }
+    //}
 
     /// <summary>
     /// Detect Bullet collsion event.
@@ -167,7 +167,7 @@ public class Card : MonoBehaviour
             }
             objectRenderer.material = selectedMaterial;
             ParticleSystem effect = Instantiate(selectedPartical, transform);
-            Destroy(gameObject, 6f);
+            Destroy(gameObject, 4f);
             _manager.NotifySelected(this);
         }
         

@@ -186,7 +186,7 @@ MonoBehaviour:
   baseCount: 3
   wavesPerGroup: 3
   increasePerGroup: 1
-  waitBetweenWaves: 3
+  waitBetweenWaves: 5
   spawnRadius: 0.5
   monsterHP: 10
   monsterIncreaseHP: 10
