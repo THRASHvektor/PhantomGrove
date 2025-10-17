@@ -17,7 +17,6 @@ public class Card : MonoBehaviour
     /// </summary>
     public enum CardEffectType { DoubleShot, FireRate, BulletSpeed, FrostBullet,FrostTime,Damage,PlayerHP }
 
-
     private Renderer objectRenderer;
     private Animator animator;
     private CardManager manager;
@@ -40,6 +39,15 @@ public class Card : MonoBehaviour
     /// </summary>
     /// <param name="manager">Card's parent CardManager </param>
     /// <param name="effect">Card's effect</param>
+    ///
+
+    void SetAlbedoColor(Renderer r, Color c)
+    { // 清除可能的 MPB 覆盖 r.SetPropertyBlock(null);
+
+        var mat = r.material; // 实例化材质
+        string colorProp = mat.HasProperty("_BaseColor") ? "_BaseColor" : "_Color";
+        mat.SetColor(colorProp, c);
+    }
     public void Initialize(CardManager manager, CardEffectType effect)
     {
         _manager = manager;
@@ -86,8 +94,13 @@ public class Card : MonoBehaviour
     /// </summary>
     public void DestroyCard() 
     {
-        Destroy(gameObject, cardDestroyTime);
-        StartFadeOut();
+        if(isSelect == false)
+        {
+            Debug.Log("q");
+            Destroy(gameObject, cardDestroyTime);
+            StartFadeOut();
+        }
+        
     }
     /// <summary>
     /// Fade animator play.
@@ -99,12 +112,29 @@ public class Card : MonoBehaviour
 
     void Start()
     {
-        //RandomCardText();
-        //manager = GetComponentInParent<CardManager>();
         animator = GetComponent<Animator>();
         selectedPartical.Stop();
         objectRenderer = GetComponent<Renderer>();
-        objectRenderer.material = original;
+    }
+
+    void Update()
+    {
+        if (Input.GetMouseButtonDown(0))
+        {
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hit;
+            if (Physics.Raycast(ray, out hit))
+            {
+                // 检查是否击中了当前物体
+                if (hit.collider.gameObject == gameObject)//这个if下面的语句才是选中卡牌后执行的函数 上面的语句需要修改选中逻辑
+                {
+                    objectRenderer.material = selectedMaterial;
+                    ParticleSystem effect = Instantiate(selectedPartical, transform);
+                    Destroy(gameObject, 6f);
+                    _manager.NotifySelected(this);
+                }
+            }
+        }
     }
 
     /// <summary>
@@ -135,8 +165,10 @@ public class Card : MonoBehaviour
                     //Todo: Player effect affect.
                     break;
             }
-            Debug.Log($"Card selected => {_effect}");
-            _manager.NotifySelected();
+            objectRenderer.material = selectedMaterial;
+            ParticleSystem effect = Instantiate(selectedPartical, transform);
+            Destroy(gameObject, 6f);
+            _manager.NotifySelected(this);
         }
         
         DestroyCard();

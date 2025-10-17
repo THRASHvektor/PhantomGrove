@@ -24,6 +24,7 @@ public class CardManager : MonoBehaviour
     /// Status for checking card selection.
     /// </summary>
     private bool _awaitingSelection = false;
+    private Card clickedCard;
 
     /// <summary>
     /// Card selection phase.
@@ -47,7 +48,7 @@ public class CardManager : MonoBehaviour
     };
         Shuffle(all);
 
-        ClearCards();
+        ClearCards(clickedCard);
 
         int count = Mathf.Min(3, cardPoints.Count); // 生成三张或不超过点位数量
         for (int i = 0; i < count; i++)
@@ -75,15 +76,19 @@ public class CardManager : MonoBehaviour
 
 
         // 清理未被选中的卡（选中的卡通常在行为里会自毁，这里统一兜底清理）
-        ClearCards();
+        ClearCards(clickedCard);
     }
 
-    void ClearCards()
+    void ClearCards(Card clickedCard)
     {
-        for (int i = 0; i < _spawnedCards.Count; i++)
+        Card[] childCards = GetComponentsInChildren<Card>();
+
+        foreach (Card card in childCards)
         {
-            if (_spawnedCards[i] != null)
-                _spawnedCards[i].GetComponent<Card>().DestroyCard();
+            if (card != clickedCard && card != null)
+            {
+                card.DestroyCard();
+            }
         }
         _spawnedCards.Clear();
 
@@ -109,8 +114,9 @@ public class CardManager : MonoBehaviour
         }
     }
 
-    public void NotifySelected()
+    public void NotifySelected(Card selectedCard)
     {
         _awaitingSelection = false;
+        clickedCard = selectedCard;
     }
 }
