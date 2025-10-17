@@ -144,12 +144,12 @@ public class BallSpawner : MonoBehaviour
         // Enter Card selection after a group wave.
         if ((CurrentWave % Mathf.Max(1, wavesPerGroup) == 0))
         {
-            yield return cardmanager.GetComponent<CardManager>().ShowAndWaitSelection();
+            //yield return cardmanager.GetComponent<CardManager>().ShowAndWaitSelection();
             monsterHP += monsterIncreaseHP;
         }
 
         // wait for configured delay
-        yield return new WaitForSeconds(3f);
+        yield return new WaitForSeconds(waitBetweenWaves);
 
         // increment wave and spawn next
         CurrentWave++;

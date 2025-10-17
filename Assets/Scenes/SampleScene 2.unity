@@ -186,9 +186,9 @@ MonoBehaviour:
   baseCount: 3
   wavesPerGroup: 3
   increasePerGroup: 1
-  waitBetweenWaves: 5
+  waitBetweenWaves: 3
   spawnRadius: 0.5
-  monsterHP: 30
+  monsterHP: 10
   monsterIncreaseHP: 10
   playerTransform: {fileID: 1829846446}
   cardmanager: {fileID: 1694645896}
@@ -1574,9 +1574,9 @@ MonoBehaviour:
   casingDestroyTimer: 2
   ejectPower: 750
   roundsPerSecond: 5
-  doubleShotChance: 1
+  doubleShotChance: 0
   doubleShotDelay: 0.1
-  frostShotChance: 1
+  frostShotChance: 0
   frostTime: 2
   speedSlowRate: 0.1
 --- !u!114 &1705905720

@@ -221,7 +221,7 @@ public class TargetBall : MonoBehaviour
             if (spawner != null)
                 spawner.NotifyBallDestroyed(this);
             // Destroy this ball
-            Destroy(gameObject, 1f);
+            Destroy(gameObject, 0.2f);
         }
         else
         {
