@@ -15,7 +15,7 @@ public class Card : MonoBehaviour
     /// <summary>
     /// Card effect type affect on weapon, player.
     /// </summary>
-    public enum CardEffectType { DoubleShot, FireRate, BulletSpeed, PlayerHP }
+    public enum CardEffectType { DoubleShot, FireRate, BulletSpeed, FrostBullet,FrostTime,Damage,PlayerHP }
 
 
     private Renderer objectRenderer;
@@ -58,6 +58,13 @@ public class Card : MonoBehaviour
                 break;
             case CardEffectType.PlayerHP:
                 cardText.text = new string("Player HP +10");
+                break;
+            case CardEffectType.FrostBullet:
+                cardText.text = new string("Frost Shot + 5%");
+                break;
+            case CardEffectType.FrostTime:
+                break;
+            case CardEffectType.Damage:
                 break;
         }
 

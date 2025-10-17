@@ -32,12 +32,14 @@ public class BallSpawner : MonoBehaviour
     [Tooltip("Random spawn radius around each spawn point (0 = exact transform).")]
     public float spawnRadius = 0.5f;
 
+    [Header("Monster settings")]
     [Tooltip("Monster Health (default in 30).")]
     public float monsterHP = 30f;
     [Tooltip("Monster Health increasment after wave group (default in 30).")]
     public float monsterIncreaseHP = 10f;
     public int CurrentWave { get; private set; } = 1;
 
+    
     private int remainingBalls = 0;
     private bool waveInProgress = false;
 
