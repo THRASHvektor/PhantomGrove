@@ -6515,7 +6515,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 447954, guid: 11453e2ce9bf9134381242cfc38eba68, type: 3}
       propertyPath: m_LocalScale.y
-      value: 0.7688
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 447954, guid: 11453e2ce9bf9134381242cfc38eba68, type: 3}
       propertyPath: m_LocalPosition.x
@@ -13317,6 +13317,7 @@ MonoBehaviour:
   frostShotChance: 0
   frostTime: 2
   speedSlowRate: 1
+  initText: {fileID: 1547063415}
 --- !u!65 &1652693036
 BoxCollider:
   m_ObjectHideFlags: 0
