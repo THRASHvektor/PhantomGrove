@@ -5,6 +5,11 @@ Game Name: Phantom Grove
 ## **First Time Games Tips:**    
 If it's your first time playing this game, please read the **README** for a better experience. Since our product is still in the development stage, in-game guides and related information may be limited.      
 Once you are in the game, try to find a **weapon** (a pistol) on the **white desk** and fight against enemies coming from everywhere. After you defeat all the enemies in one wave, there will be a short break, and then the next wave of enemies will spawn and keep hunting you. All you have to do is survive this endless night. However, after several waves, random reward cards will spawn in the center of the map. Use your weapon to shoot them to gain their effects (you will be safe during this phase). Choose them wisely to build your own weapon combination for better survival. The number of enemies will increase wave by wave. See how many waves you can survive.  
+Game is developed in **SteamVR** so make sure you have the enviroment.
+
+## **Potential Issue:**
+1.Movement Disabled. Some user might find the controller might not working in the game(e.g. can not move or turn in game). This might be casused by your own controller settings. Try  **restore** to **default** version.
+(Oculus controller is used during the development. However, some report that is not working properly.)
 
 ## Developed Content:  
 1.Basic player controller to allow users with controllers to control the player's movement, including moving, turning, and teleporting.  
