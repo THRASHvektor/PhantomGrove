@@ -226,7 +226,6 @@ GameObject:
   m_Component:
   - component: {fileID: 447954}
   - component: {fileID: 11465950}
-  - component: {fileID: 8146321497173041211}
   - component: {fileID: 2849745782626623243}
   - component: {fileID: 4748351540627503560}
   - component: {fileID: -155618605740760399}
@@ -287,19 +286,6 @@ MonoBehaviour:
     actionPath: /actions/default/in/HeadsetOnHead
     needsReinit: 0
   allowToggleTo2D: 1
---- !u!114 &8146321497173041211
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 107946}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ad90ab4de22e3c24ea9c83ac2fc259f0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  healthMax: 100
 --- !u!143 &2849745782626623243
 CharacterController:
   m_ObjectHideFlags: 0
@@ -338,16 +324,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 028dfa6eb3c691e4ea94762b6668ffeb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  moveAction:
+    actionPath: 
+    needsReinit: 0
+  moveHand: 1
+  moveSpeed: 1.5
+  moveDeadzone: 0.15
   turnAction:
     actionPath: 
     needsReinit: 0
   turnHand: 2
   turnSpeedDegPerSec: 180
   turnDeadzone: 0.2
-  input:
-    actionPath: /actions/default/in/TouchPad
-    needsReinit: 0
-  speed: 2.5
+  gravity: 9.81
+  requireFocus: 1
+  logInputEverySecond: 0
 --- !u!114 &-155618605740760399
 MonoBehaviour:
   m_ObjectHideFlags: 0
