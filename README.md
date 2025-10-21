@@ -28,13 +28,13 @@ During the game, **make sure your VR can detect your controller** to prevent une
 6.UI interaction.  
 
 ## Group Members:  
- Name  | GithubID 
- ---- | ----- 
- Shiteng CAI  |  THRASHvektor 
-Chaofeng WU | Chaofeng0227
-Zhuokai CHEN	| MichaelChen  
-Dayu WANG		| Dayuwangasdsa  
-Qicheng YUAN	| sadsadcry  
-Lingchao WANG	| wanglingchao-2025  
-Qinmei WU		| NULLISKK  
-Sheng QIANG	| BaronNahsuor  
+ Name  | GithubID | StudentID
+ ---- | ----- |-----
+ Shiteng CAI  |  THRASHvektor | 24123673g
+Chaofeng WU | Chaofeng0227 | 25125767g
+Zhuokai CHEN	| MichaelChen  | 25106193g
+Dayu WANG		| Dayuwangasdsa  | 25124395g
+Qicheng YUAN	| sadsadcry  | 25113521g
+Lingchao WANG	| wanglingchao-2025 | 25127549g 
+Qinmei WU		| NULLISKK  | 25064235g
+Sheng QIANG	| BaronNahsuor  | 25108944g
