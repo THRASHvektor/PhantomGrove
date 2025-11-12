@@ -110,6 +110,8 @@ public class M1911 : MonoBehaviour
     private bool savedConstraints;
     private float bulletDamage = 10f;
 
+    public GameObject initText;
+
 
     /// <summary>
     /// Initialize references and internal timers.
@@ -137,6 +139,7 @@ public class M1911 : MonoBehaviour
         if (interactable != null && interactable.attachedToHand != null)
         {
             var source = interactable.attachedToHand.handType;
+            initText.SetActive(false);
             if (fireAction != null && fireAction[source].stateDown)
             {
                 float now = Time.time;
