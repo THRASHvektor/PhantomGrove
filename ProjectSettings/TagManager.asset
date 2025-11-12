@@ -20,8 +20,8 @@ TagManager:
   - Weapon
   - Card
   - 
-  - 
-  - 
+  - VRUI
+  - PlayerHands
   - 
   - 
   - 
@@ -42,4 +42,7 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: UI
+    uniqueID: 48988241
     locked: 0

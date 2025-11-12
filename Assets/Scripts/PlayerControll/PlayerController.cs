@@ -14,6 +14,12 @@ public class PlayerController : MonoBehaviour
     public float turnSpeedDegPerSec = 180f;
     [Range(0f, 0.5f)] public float turnDeadzone = 0.2f;
 
+    [Header("Menu")]
+    public SteamVR_Action_Boolean menuAction;                  // 绑定你的菜单按钮
+    public SteamVR_Input_Sources menuHand = SteamVR_Input_Sources.LeftHand;
+    public GameObject SystemMenuPrefab;                      // 系统菜单UI预制体
+    private GameObject _systemMenuInstance;
+
     [Header("Gravity")]
     public float gravity = 9.81f;
 
@@ -39,6 +45,10 @@ public class PlayerController : MonoBehaviour
             if (turnAction == null)
             {
                 // turnAction = SteamVR_Actions.default_Turn;
+            }
+            if (menuAction == null)
+            {
+                // menuAction = SteamVR_Actions.default_Menu;
             }
         }
         catch { /* 忽略 */ }
@@ -107,6 +117,15 @@ public class PlayerController : MonoBehaviour
                 Vector3 pivot = new Vector3(hmd.position.x, transform.position.y, hmd.position.z);
                 float yaw = x * turnSpeedDegPerSec * Time.deltaTime;
                 transform.RotateAround(pivot, Vector3.up, yaw);
+            }
+        }
+
+        // 显示系统菜单
+        if (menuAction != null && menuAction.GetStateDown(menuHand))
+        {
+            if (_systemMenuInstance == null && SystemMenuPrefab != null)
+            {
+                _systemMenuInstance = Instantiate(SystemMenuPrefab, transform.Find("SteamVRObjects/VRCamera/UI"), false);
             }
         }
 
