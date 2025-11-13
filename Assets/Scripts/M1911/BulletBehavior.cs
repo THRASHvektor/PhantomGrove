@@ -74,10 +74,11 @@ public class BulletBehavior : MonoBehaviour
 
         // ���й���
         var target = other.GetComponent<TargetBall>();
+        Vector3 hitPoint = other.ClosestPoint(transform.position);
         if (target != null)
         {
             _hasHit = true;
-            target.ApplyDamageImmediate(this);
+            target.ApplyDamageImmediate(this, hitPoint);
 
             // ���ˣ������Ҫ��
             if (knockbackForce > 0)
@@ -90,7 +91,6 @@ public class BulletBehavior : MonoBehaviour
         // ���Ż�����Ч
         if (impactPrefab != null)
         {
-            Vector3 hitPoint = other.ClosestPoint(transform.position);
             Instantiate(impactPrefab, hitPoint, Quaternion.identity);
         }
 

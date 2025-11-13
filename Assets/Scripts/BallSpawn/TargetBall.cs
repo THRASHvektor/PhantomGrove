@@ -42,6 +42,9 @@ public class TargetBall : MonoBehaviour
     private float originalMoveSpeed;
     private MonsterChase monsterChase;
     private bool isDead = false;
+    [Header("Damage Popup")]
+    [Tooltip("Prefab for floating damage text. Should have a TextMeshPro component or DamagePopup script on root.")]
+    public GameObject damageTextPrefab;
 
     void Awake()
     {
@@ -135,7 +138,8 @@ public class TargetBall : MonoBehaviour
     /// <summary>
     /// ���ӵ����ã�����˺��ͷ���
     /// </summary>
-    public void ApplyDamageImmediate(BulletBehavior bb)
+    // Updated to accept the hit point so we can spawn damage popups there.
+    public void ApplyDamageImmediate(BulletBehavior bb, Vector3 hitPoint)
     {
         if (isDead) return;
 
@@ -154,16 +158,46 @@ public class TargetBall : MonoBehaviour
             if (bb.shooter != null)
             {
                 var w1 = bb.shooter.GetComponent<M1911>();
-                if (w1 != null)
-                {
-                    w1.StartFrostCooldown();
-                }
+                if (w1 != null) w1.StartFrostCooldown();
                 var w2 = bb.shooter.GetComponent<M1A1>();
-                if (w2 != null)
+                if (w2 != null) w2.StartFrostCooldown();
+            }
+        }
+
+        // Spawn damage popup at hit point if prefab set
+        if (damageTextPrefab != null)
+        {
+            var go = Instantiate(damageTextPrefab, hitPoint + Vector3.up * 0.1f, Quaternion.identity);
+            // Ensure popup faces camera and has sane scale so it's visible
+            if (Camera.main != null)
+            {
+                go.transform.rotation = Camera.main.transform.rotation;
+            }
+            go.transform.localScale = Vector3.one;
+            var popup = go.GetComponent<DamagePopup>();
+            if (popup != null)
+            {
+                string dmgText = ((int)bb.damage).ToString();
+                Color c = bb.isFrostBullet ? frostColor : Color.white;
+                popup.Init(dmgText, c);
+                Debug.Log($"[TargetBall] Spawned DamagePopup '{dmgText}' color={c} at {hitPoint}");
+            }
+            else
+            {
+                // fallback: if prefab uses TextMeshPro directly
+                var tmp = go.GetComponent<TMPro.TextMeshPro>();
+                if (tmp != null)
                 {
-                    w2.StartFrostCooldown();
+                    tmp.text = ((int)bb.damage).ToString();
+                    tmp.color = bb.isFrostBullet ? frostColor : Color.white;
+                    Destroy(go, 1f);
+                    Debug.Log($"[TargetBall] Spawned TMP damage text '{tmp.text}' color={tmp.color} at {hitPoint}");
                 }
             }
+        }
+        else
+        {
+            Debug.LogWarning($"[TargetBall] damageTextPrefab not assigned on {gameObject.name}; no damage popup will be shown.");
         }
 
         UpdateHealthBar();

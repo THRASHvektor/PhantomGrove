@@ -200,6 +200,7 @@ MonoBehaviour:
     m_ColorSpace: -1
     m_NumColorKeys: 3
     m_NumAlphaKeys: 3
+  damageTextPrefab: {fileID: 4774240256153986074, guid: ccd9d55170b6b0f48bedd880c96fba34, type: 3}
 --- !u!1001 &3339249238150252095
 PrefabInstance:
   m_ObjectHideFlags: 0
