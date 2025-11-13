@@ -337,7 +337,7 @@ MonoBehaviour:
   turnSpeedDegPerSec: 180
   turnDeadzone: 0.2
   menuAction:
-    actionPath: /actions/default/in/GrabGrip
+    actionPath: /actions/default/in/openMenu
     needsReinit: 0
   menuHand: 1
   SystemMenuPrefab: {fileID: 3608242960280358002, guid: c854556d500201c4996a8dd16bd2f7e6, type: 3}

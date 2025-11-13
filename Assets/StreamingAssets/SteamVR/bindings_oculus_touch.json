@@ -4,6 +4,8 @@
    "app_key" : "application.generated.unity.phantomvr.exe",
    "bindings" : {
       "/actions/buggy" : {
+         "chords" : [],
+         "haptics" : [],
          "poses" : [],
          "skeleton" : [],
          "sources" : [
@@ -251,10 +253,22 @@
                "mode" : "joystick",
                "parameters" : {},
                "path" : "/user/hand/right/input/joystick"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/default/in/openmenu"
+                  }
+               },
+               "mode" : "button",
+               "parameters" : {},
+               "path" : "/user/hand/left/input/x"
             }
          ]
       },
       "/actions/phantom" : {
+         "chords" : [],
+         "haptics" : [],
          "poses" : [],
          "skeleton" : [],
          "sources" : [
@@ -281,6 +295,8 @@
          ]
       },
       "/actions/platformer" : {
+         "chords" : [],
+         "haptics" : [],
          "poses" : [],
          "skeleton" : [],
          "sources" : [
