@@ -104,6 +104,10 @@ public class M1911 : MonoBehaviour
     [Range(0f, 1f)]
     public float speedSlowRate = 0.1f;
     [Header("FireShot")]
+    [Header("Audio")]
+    public AudioSource audioSource;   
+    public AudioClip fireClip;        
+
     [Tooltip("Probability (0..1) that a fired shot will be a fire bullet.")]
     public float fireShotChance = 0f;
     public float fireDuration = 3f;
@@ -165,6 +169,8 @@ public class M1911 : MonoBehaviour
             rb.interpolation = RigidbodyInterpolation.Interpolate;
             rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
         }
+        if (audioSource == null)
+            audioSource = GetComponent<AudioSource>();
 
     }
 
@@ -263,6 +269,10 @@ public class M1911 : MonoBehaviour
         }
         Destroy(bulletInstance, bulletLifetime);
 
+        if (audioSource != null && fireClip != null)
+        {
+            audioSource.PlayOneShot(fireClip);
+        }
         //new muzzle flash function
         if (muzzleFlash)
         {

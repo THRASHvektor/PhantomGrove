@@ -52,6 +52,8 @@ public class M1A1 : MonoBehaviour
 
     [Tooltip("Cooldown (seconds) after a fire bullet successfully applies burn on a target")]
     public float fireCooldownOnHit = 10f;
+    
+
 
     public void IncreaseFireChanceByAbsolute(float amount)
     {
@@ -88,7 +90,9 @@ public class M1A1 : MonoBehaviour
     
 
     public GameObject initText;
-
+    [Header("Audio")]
+    public AudioSource audioSource;   // 枪上的 AudioSource
+    public AudioClip fireClip;        // 开火音效
     void Start()
     {
         animator = GetComponentInChildren<Animator>(true);
@@ -100,6 +104,8 @@ public class M1A1 : MonoBehaviour
             rb.interpolation = RigidbodyInterpolation.Interpolate;
             rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
         }
+        if (audioSource == null)
+            audioSource = GetComponent<AudioSource>();
     }
 
     void Update()
@@ -180,6 +186,10 @@ public class M1A1 : MonoBehaviour
                     bb.InitCritBullet();
                     Debug.Log("M1A1 Crit Bullet Shotted!");
                 }
+        }
+        if (audioSource != null && fireClip != null)
+        {
+            audioSource.PlayOneShot(fireClip);
         }
         Destroy(bulletInstance, bulletLifetime);
 
