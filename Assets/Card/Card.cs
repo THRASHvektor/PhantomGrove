@@ -59,11 +59,13 @@ public class Card : MonoBehaviour
 
     public void DestroyCard()
     {
-        if (!isSelect)
-        {
-            Destroy(gameObject, cardDestroyTime);
-            StartFadeOut();
-        }
+        // Always start the fade-out and destroy sequence for cleanup.
+        // CardManager marks non-selected cards and then calls DestroyCard();
+        // previously this method skipped destruction when `isSelect` was true,
+        // which prevented non-selected cards from being removed because
+        // CardManager set `isSelect = true` before calling DestroyCard().
+        Destroy(gameObject, cardDestroyTime);
+        StartFadeOut();
     }
 
     void StartFadeOut()

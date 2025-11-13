@@ -44,6 +44,12 @@ public class M1A1 : MonoBehaviour
     public float frostShotChance = 0.02f;
     public float frostTime = 2f;
     public float speedSlowRate = 0.1f;
+    /// <summary>
+    /// Frost hit cooldown (seconds) to apply after a frost bullet actually hits a target.
+    /// </summary>
+    public float frostCooldownOnHit = 1f;
+
+    private float _nextAllowedFrostTime = 0f;
 
     private Interactable interactable;
     private Animator animator;
@@ -90,7 +96,7 @@ public class M1A1 : MonoBehaviour
                     if (Random.value <= doubleShotChance)
                     {
                         StartCoroutine(DoDoubleShotAfterDelay(source, doubleShotDelay));
-                        Debug.Log("M1A1 Double Shotted!");
+                        //Debug.Log("M1A1 Double Shotted!");
                     }
 
                     SetNextAllowedForSource(source, now + (1f / Mathf.Max(0.0001f, roundsPerSecond)));
@@ -120,11 +126,15 @@ public class M1A1 : MonoBehaviour
             bb.shooter = this.gameObject;
             bb.hittableLayers = LayerMask.GetMask("Enemy", "Default", "World");
             bb.damage = bulletDamage;
-            if (Random.value <= frostShotChance)
+            if (Random.value <= frostShotChance && Time.time >= _nextAllowedFrostTime)
             {
                 bb.isFrostBullet = true;
                 bb.InitFrostBullet(frostTime, speedSlowRate);
                 Debug.Log("M1A1 Frost Bullet Shotted!");
+            }
+            else if (Random.value <= frostShotChance && Time.time < _nextAllowedFrostTime)
+            {
+                Debug.Log("M1A1 frost suppressed due to weapon frost cooldown.");
             }
         }
         Destroy(bulletInstance, bulletLifetime);
@@ -182,6 +192,18 @@ public class M1A1 : MonoBehaviour
     public void SetDoubleShotChance(float chance)
     {
         doubleShotChance = Mathf.Clamp01(chance);
+    }
+
+    /// <summary>
+    /// Called when a fired frost bullet actually hits a target. Starts the frost cooldown
+    /// so subsequent fired bullets won't be frost for the cooldown duration.
+    /// </summary>
+    /// <param name="seconds">Cooldown length in seconds (if zero, uses weapon's default).</param>
+    public void StartFrostCooldown(float seconds = 0f)
+    {
+        float dur = seconds > 0f ? seconds : frostCooldownOnHit;
+        _nextAllowedFrostTime = Time.time + dur;
+        Debug.Log($"[M1A1] Frost cooldown started for {dur}s (until {_nextAllowedFrostTime:F2})");
     }
 
     public float GetDoubleShotChance() => doubleShotChance;

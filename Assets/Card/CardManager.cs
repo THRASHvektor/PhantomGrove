@@ -53,6 +53,7 @@ public class CardManager : MonoBehaviour
         CardEffectType.BulletSpeed,
         //CardEffectType.PlayerHP
         CardEffectType.Damage,
+        CardEffectType.FrostBullet,
     };
         Shuffle(all);
 

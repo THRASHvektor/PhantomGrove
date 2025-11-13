@@ -101,7 +101,16 @@ public class M1911 : MonoBehaviour
     /// <summary>
     /// Speed slow rate for frost enemy.
     /// </summary>
+    [Range(0f, 1f)]
     public float speedSlowRate = 0.1f;
+    /// <summary>
+    /// When a frost bullet actually hits a target, start this cooldown on the weapon
+    /// so subsequent shots can't apply frost for this many seconds.
+    /// </summary>
+    public float frostCooldownOnHit = 1f;
+
+    // Time until this weapon is allowed to create another frost bullet (set on frost HIT)
+    private float _nextAllowedFrostTime = 0f;
 
     private Interactable interactable;
     private Animator animator;
@@ -157,7 +166,7 @@ public class M1911 : MonoBehaviour
                     {
                         //  Schedule second shot after delay, but don't allow second shot to bypass cooldown:
                         StartCoroutine(DoDoubleShotAfterDelay(source, doubleShotDelay));
-                        Debug.Log("Double Shotted!");
+                        //Debug.Log("Double Shotted!");
                     }
 
                     SetNextAllowedForSource(source, now + (1f / Mathf.Max(0.0001f, roundsPerSecond)));
@@ -197,11 +206,16 @@ public class M1911 : MonoBehaviour
             bb.hittableLayers = LayerMask.GetMask("Enemy", "Default","World");
             bb.damage = bulletDamage;
             // Frost Bullet Decision.
-            if(Random.value <= frostShotChance)
+            if (Random.value <= frostShotChance && Time.time >= _nextAllowedFrostTime)
             {
                 bb.isFrostBullet = true;
                 bb.InitFrostBullet(frostTime,speedSlowRate);
                 Debug.Log("Frost Bullet Shotted!");
+            }
+            else if (Random.value <= frostShotChance && Time.time < _nextAllowedFrostTime)
+            {
+                // Frost chance rolled but weapon is on post-hit frost cooldown; skip making this bullet frost.
+                Debug.Log("Frost suppressed due to weapon frost cooldown.");
             }
         }
         Destroy(bulletInstance, bulletLifetime);
@@ -312,6 +326,18 @@ public class M1911 : MonoBehaviour
     public void SetDoubleShotChance(float chance)
     {
         doubleShotChance = Mathf.Clamp01(chance);
+    }
+
+    /// <summary>
+    /// Called when a fired frost bullet actually hits a target. Starts the frost cooldown
+    /// so subsequent fired bullets won't be frost for the cooldown duration.
+    /// </summary>
+    /// <param name="seconds">Cooldown length in seconds (if zero, uses weapon's default).</param>
+    public void StartFrostCooldown(float seconds = 0f)
+    {
+        float dur = seconds > 0f ? seconds : frostCooldownOnHit;
+        _nextAllowedFrostTime = Time.time + dur;
+        Debug.Log($"[M1911] Frost cooldown started for {dur}s (until {_nextAllowedFrostTime:F2})");
     }
 
     /// <summary>

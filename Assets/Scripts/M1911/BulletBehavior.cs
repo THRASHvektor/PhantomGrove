@@ -3,46 +3,51 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// ×Óµ¯ÐÐÎª½Å±¾£¬ÊÊÓÃÓÚTriggerÅÐ¶¨ºÍ´úÂë¿ØÖÆÒÆ¶¯
+/// ï¿½Óµï¿½ï¿½ï¿½Îªï¿½Å±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Triggerï¿½Ð¶ï¿½ï¿½Í´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ¶ï¿½
 /// </summary>
 public class BulletBehavior : MonoBehaviour
 {
     [Header("Bullet Settings")]
-    public float moveSpeed = 20f;         // ×Óµ¯ËÙ¶È
-    public float lifetime = 5f;           // ´æ»îÊ±¼ä
-    public float damage = 10f;            // ÉËº¦
-    public float knockbackForce = 0f;     // »÷ÍËÁ¦¶È£¨ÆÕÍ¨×Óµ¯Îª0£¬ÌØÊâ×Óµ¯¿ÉÉèÖÃ£©
+    public float moveSpeed = 20f;         // ï¿½Óµï¿½ï¿½Ù¶ï¿½
+    public float lifetime = 5f;           // ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
+    public float damage = 10f;            // ï¿½Ëºï¿½
+    public float knockbackForce = 0f;     // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È£ï¿½ï¿½ï¿½Í¨ï¿½Óµï¿½Îª0ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Óµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã£ï¿½
 
     [Header("Frost Bullet Settings")]
-    public bool isFrostBullet = false;    // ÊÇ·ñÎªº®±ù×Óµ¯
-    public float frostTime = 2f;          // º®±ù³ÖÐøÊ±¼ä
-    public float speedSlowRate = 0.1f;    // ¹ÖÎï¼õËÙ±ÈÀý
+    public bool isFrostBullet = false;    // ï¿½Ç·ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½Óµï¿½
+    public float frostTime = 2f;          // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
+    public float speedSlowRate = 0.1f;    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ù±ï¿½ï¿½ï¿½
 
     [Header("Shooter & Layer")]
-    public GameObject shooter;            // ·¢ÉäÕß
-    public LayerMask hittableLayers;      // ¿ÉÃüÖÐµÄ²ã
+    public GameObject shooter;            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    public LayerMask hittableLayers;      // ï¿½ï¿½ï¿½ï¿½ï¿½ÐµÄ²ï¿½
+    // Guard to ensure this bullet only applies damage once (multiple child colliders
+    // on a target can cause multiple OnTriggerEnter calls for the same physical
+    // bullet). Set to true when the bullet processes a hit so further triggers
+    // are ignored.
+    private bool _hasHit = false;
 
     [Header("Impact Effect")]
-    public GameObject impactPrefab;       // ÃüÖÐÌØÐ§
+    public GameObject impactPrefab;       // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð§
 
     void Start()
     {
-        // ×Ô¶¯Ïú»Ù
+        // ï¿½Ô¶ï¿½ï¿½ï¿½ï¿½ï¿½
         Destroy(gameObject, lifetime);
 
-        // È·±£ColliderÊÇTrigger
+        // È·ï¿½ï¿½Colliderï¿½ï¿½Trigger
         var col = GetComponent<Collider>();
         if (col != null) col.isTrigger = true;
     }
 
     void Update()
     {
-        // ´úÂë¿ØÖÆ×Óµ¯ÒÆ¶¯
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Óµï¿½ï¿½Æ¶ï¿½
         transform.position += transform.forward * moveSpeed * Time.deltaTime;
     }
 
     /// <summary>
-    /// ³õÊ¼»¯º®±ù×Óµ¯²ÎÊý
+    /// ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Óµï¿½ï¿½ï¿½ï¿½ï¿½
     /// </summary>
     public void InitFrostBullet(float frostTime, float speedSlowRate)
     {
@@ -52,27 +57,29 @@ public class BulletBehavior : MonoBehaviour
     }
 
     /// <summary>
-    /// TriggerÅÐ¶¨ÃüÖÐ
+    /// Triggerï¿½Ð¶ï¿½ï¿½ï¿½ï¿½ï¿½
     /// </summary>
     void OnTriggerEnter(Collider other)
     {
-        // ²»´ò×Ô¼º
+        if (_hasHit) return;
+        // ï¿½ï¿½ï¿½ï¿½ï¿½Ô¼ï¿½
         if (shooter != null && other.transform.IsChildOf(shooter.transform)) return;
 
-        // Ö»´òhittableLayers
+        // Ö»ï¿½ï¿½hittableLayers
         if (((1 << other.gameObject.layer) & hittableLayers.value) == 0)
         {
             Destroy(gameObject);
             return;
         }
 
-        // ÃüÖÐ¹ÖÎï
+        // ï¿½ï¿½ï¿½Ð¹ï¿½ï¿½ï¿½
         var target = other.GetComponent<TargetBall>();
         if (target != null)
         {
+            _hasHit = true;
             target.ApplyDamageImmediate(this);
 
-            // »÷ÍË£¨Èç¹ûÐèÒª£©
+            // ï¿½ï¿½ï¿½Ë£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½
             if (knockbackForce > 0)
             {
                 Vector3 direction = (other.transform.position - transform.position).normalized;
@@ -80,7 +87,7 @@ public class BulletBehavior : MonoBehaviour
             }
         }
 
-        // ²¥·Å»÷ÖÐÌØÐ§
+        // ï¿½ï¿½ï¿½Å»ï¿½ï¿½ï¿½ï¿½ï¿½Ð§
         if (impactPrefab != null)
         {
             Vector3 hitPoint = other.ClosestPoint(transform.position);

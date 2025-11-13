@@ -3,18 +3,18 @@ using UnityEngine.AI;
 
 public class MonsterChase : MonoBehaviour
 {
-    [Header("¹ÖÎïÒÆ¶¯²ÎÊý")]
+    [Header("ï¿½ï¿½ï¿½ï¿½ï¿½Æ¶ï¿½ï¿½ï¿½ï¿½ï¿½")]
     public float moveSpeed = 3f;
 
-    [Header("Íæ¼Ò")]
+    [Header("ï¿½ï¿½ï¿½")]
     public Transform player;
-    public float chaseRadius = 30f; // ×·×ÙÍæ¼ÒµÄ·¶Î§
+    public float chaseRadius = 30f; // ×·ï¿½ï¿½ï¿½ï¿½ÒµÄ·ï¿½Î§
 
-    [Header("¹¥»÷²ÎÊý")]
+    [Header("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½")]
     public int damagePerHit = 10;
-    public float attackCooldown = 5f; // ¹¥»÷ÀäÈ´Ê±¼ä£¨Ãë£©
+    public float attackCooldown = 5f; // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È´Ê±ï¿½ä£¨ï¿½ë£©
 
-    [Header("µ÷ÊÔ")]
+    [Header("ï¿½ï¿½ï¿½ï¿½")]
     public bool drawGizmos = true;
 
     private NavMeshAgent agent;
@@ -27,7 +27,7 @@ public class MonsterChase : MonoBehaviour
         agent = GetComponent<NavMeshAgent>();
         if (agent == null)
         {
-            Debug.LogError("NavMeshAgent ×é¼þÎ´¹ÒÔØÔÚ¹ÖÎï¶ÔÏóÉÏ£¡");
+            Debug.LogError("NavMeshAgent ï¿½ï¿½ï¿½Î´ï¿½ï¿½ï¿½ï¿½ï¿½Ú¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï£ï¿½");
             enabled = false;
             return;
         }
@@ -39,11 +39,53 @@ public class MonsterChase : MonoBehaviour
             playerHealth = player.GetComponent<PlayerHealth>();
     }
 
+    /// <summary>
+    /// Safely set the movement speed for this monster and immediately update the NavMeshAgent.
+    /// Use this when external code wants to change speed at runtime (e.g. frost slow).
+    /// </summary>
+    /// <param name="s">New move speed.</param>
+    public void SetMoveSpeed(float s)
+    {
+        moveSpeed = s;
+        if (agent != null)
+        {
+            agent.speed = moveSpeed;
+            // If speed is effectively zero, clear path and stop the agent so it halts immediately.
+            bool stop = moveSpeed <= 0.0001f;
+            if (stop)
+            {
+                agent.ResetPath();
+                agent.isStopped = true;
+                Debug.Log($"[MonsterChase] SetMoveSpeed STOP on {gameObject.name}: speed={moveSpeed}, path cleared, isStopped={agent.isStopped}");
+            }
+            else
+            {
+                // Resume agent movement immediately and set destination to player if available.
+                // Also clamp current agent velocity so reducing speed takes immediate effect
+                // instead of allowing a longer residual sliding due to existing velocity.
+                if (agent.velocity.sqrMagnitude > 0f && agent.velocity.magnitude > moveSpeed)
+                {
+                    agent.velocity = agent.velocity.normalized * moveSpeed;
+                }
+                agent.isStopped = false;
+                if (player != null)
+                {
+                    NavMeshHit hit;
+                    if (NavMesh.SamplePosition(player.position, out hit, 1.0f, NavMesh.AllAreas))
+                    {
+                        agent.SetDestination(hit.position);
+                    }
+                }
+                Debug.Log($"[MonsterChase] SetMoveSpeed RESUME on {gameObject.name}: speed={moveSpeed}, isStopped={agent.isStopped}");
+            }
+        }
+    }
+
     void Update()
     {
         if (player == null)
         {
-            Debug.LogWarning("Íæ¼ÒTransformÎ´¸³Öµ£¡");
+            Debug.LogWarning("ï¿½ï¿½ï¿½TransformÎ´ï¿½ï¿½Öµï¿½ï¿½");
             return;
         }
 
@@ -62,7 +104,9 @@ public class MonsterChase : MonoBehaviour
             agent.ResetPath();
         }
 
-        // ¹¥»÷ÀäÈ´Âß¼­
+        // Note: moveSpeed should be changed via SetMoveSpeed(...) to update agent.speed immediately.
+
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È´ï¿½ß¼ï¿½
         if (isPlayerInRange && playerHealth != null)
         {
             attackTimer += Time.deltaTime;
@@ -74,7 +118,7 @@ public class MonsterChase : MonoBehaviour
         }
         else
         {
-            attackTimer = 0f; // Àë¿ªÊ±ÖØÖÃ¼ÆÊ±
+            attackTimer = 0f; // ï¿½ë¿ªÊ±ï¿½ï¿½ï¿½Ã¼ï¿½Ê±
         }
     }
 
@@ -83,10 +127,10 @@ public class MonsterChase : MonoBehaviour
         if (other.transform == player)
         {
             isPlayerInRange = true;
-            attackTimer = 0f; // ½øÈëÊ±ÖØÖÃ¼ÆÊ±
+            attackTimer = 0f; // ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½Ã¼ï¿½Ê±
             if (playerHealth != null)
             {
-                playerHealth.TakeDamage(damagePerHit); // Á¢¼´µôÑª
+                playerHealth.TakeDamage(damagePerHit); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñª
             }
         }
     }
@@ -96,7 +140,7 @@ public class MonsterChase : MonoBehaviour
         if (other.transform == player)
         {
             isPlayerInRange = false;
-            attackTimer = 0f; // Àë¿ªÊ±ÖØÖÃ¼ÆÊ±
+            attackTimer = 0f; // ï¿½ë¿ªÊ±ï¿½ï¿½ï¿½Ã¼ï¿½Ê±
         }
     }
 

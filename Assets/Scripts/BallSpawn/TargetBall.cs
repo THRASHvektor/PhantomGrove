@@ -141,10 +141,29 @@ public class TargetBall : MonoBehaviour
 
         currentHealth -= bb.damage;
 
-        // ����Ч��
+        // Start hit feedback immediately so frost feedback waits for it.
+        if (hitCo != null) StopCoroutine(hitCo);
+        hitCo = StartCoroutine(HitFeedbackRoutine());
+
+        // ����Ч�� (frost applied after hit feedback finishes)
         if (bb.isFrostBullet)
         {
             ApplyOrRefreshFrost(bb.frostTime, bb.speedSlowRate);
+
+            // Notify shooter (weapon) that a frost bullet actually hit so it can start frost cooldown.
+            if (bb.shooter != null)
+            {
+                var w1 = bb.shooter.GetComponent<M1911>();
+                if (w1 != null)
+                {
+                    w1.StartFrostCooldown();
+                }
+                var w2 = bb.shooter.GetComponent<M1A1>();
+                if (w2 != null)
+                {
+                    w2.StartFrostCooldown();
+                }
+            }
         }
 
         UpdateHealthBar();
@@ -200,7 +219,16 @@ public class TargetBall : MonoBehaviour
 
         if (monsterChase != null)
         {
-            monsterChase.moveSpeed = originalMoveSpeed * (1f - speedSlowRate);
+            float newSpeed = originalMoveSpeed * (1f - speedSlowRate);
+            monsterChase.SetMoveSpeed(newSpeed);
+            Debug.Log($"[TargetBall] Apply frost to {gameObject.name}: moveSpeed {originalMoveSpeed} -> {newSpeed}");
+
+            // Log NavMeshAgent state for debugging immediate-stop behavior
+            var agent = monsterChase.GetComponent<UnityEngine.AI.NavMeshAgent>();
+            if (agent != null)
+            {
+                Debug.Log($"[TargetBall] Agent state after frost apply: velocity={agent.velocity.magnitude:F3}, hasPath={agent.hasPath}, isStopped={agent.isStopped}, remainingDistance={agent.remainingDistance:F3}");
+            }
         }
 
         if (frostCo != null)
@@ -248,7 +276,13 @@ public class TargetBall : MonoBehaviour
 
         if (monsterChase != null)
         {
-            monsterChase.moveSpeed = originalMoveSpeed;
+            monsterChase.SetMoveSpeed(originalMoveSpeed);
+            Debug.Log($"[TargetBall] Disable frost on {gameObject.name}: restore moveSpeed -> {originalMoveSpeed}");
+            var agent = monsterChase.GetComponent<UnityEngine.AI.NavMeshAgent>();
+            if (agent != null)
+            {
+                Debug.Log($"[TargetBall] Agent state after frost disable: velocity={agent.velocity.magnitude:F3}, hasPath={agent.hasPath}, isStopped={agent.isStopped}, remainingDistance={agent.remainingDistance:F3}");
+            }
         }
         frostCo = null;
         Debug.Log("Disable Frost");
