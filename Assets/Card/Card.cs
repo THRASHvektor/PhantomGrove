@@ -81,38 +81,58 @@ public class Card : MonoBehaviour
     }
 
     /// <summary>
-    /// ÓÃTriggerÅÐ¶¨¿¨ÅÆ±»×Óµ¯ÉäÖÐ
+    /// ï¿½ï¿½Triggerï¿½Ð¶ï¿½ï¿½ï¿½ï¿½Æ±ï¿½ï¿½Óµï¿½ï¿½ï¿½ï¿½ï¿½
     /// </summary>
     void OnTriggerEnter(Collider other)
     {
-        if (isSelect) return; // ·ÀÖ¹¶à´Î´¥·¢
+        if (isSelect) return; // ï¿½ï¿½Ö¹ï¿½ï¿½Î´ï¿½ï¿½ï¿½
 
         var bullet = other.GetComponent<BulletBehavior>();
         if (bullet != null)
         {
             isSelect = true;
 
-            // ¿¨ÅÆÐ§¹ûÓ¦ÓÃµ½ÎäÆ÷
-            var shooter = bullet.shooter != null ? bullet.shooter.GetComponent<M1911>() : null;
+            // Determine shooter type: support both M1911 (pistol) and M1A1 (SMG)
+            var shooterObj = bullet.shooter;
+            var shooter1911 = shooterObj != null ? shooterObj.GetComponent<M1911>() : null;
+            var shooterM1A1 = shooterObj != null ? shooterObj.GetComponent<M1A1>() : null;
+
             switch (_effect)
             {
                 case CardEffectType.DoubleShot:
-                    if (shooter != null) shooter.SetDoubleShotChance(0.05f);
-                    else Debug.LogWarning("CardManager: shooter is null for DoubleShot.");
+                    if (shooter1911 != null)
+                        shooter1911.SetDoubleShotChance(0.05f);
+                    else if (shooterM1A1 != null)
+                        shooterM1A1.SetDoubleShotChance(0.01f);
+                    else
+                        Debug.LogWarning("CardManager: shooter is null for DoubleShot.");
                     break;
                 case CardEffectType.FireRate:
-                    if (shooter != null) shooter.IncreaseFireRateByPercentage(0.05f);
-                    else Debug.LogWarning("CardManager: shooter is null for FireRate.");
+                    if (shooter1911 != null)
+                        shooter1911.IncreaseFireRateByPercentage(0.05f);
+                    else if (shooterM1A1 != null)
+                        shooterM1A1.IncreaseFireRateByPercentage(0.01f);
+                    else
+                        Debug.LogWarning("CardManager: shooter is null for FireRate.");
                     break;
                 case CardEffectType.BulletSpeed:
-                    if (shooter != null) shooter.IncreaseBulletSpeedByPercentage(0.05f);
-                    else Debug.LogWarning("CardManager: shooter is null for BulletSpeed.");
+                    if (shooter1911 != null)
+                        shooter1911.IncreaseBulletSpeedByPercentage(0.05f);
+                    else if (shooterM1A1 != null)
+                        shooterM1A1.IncreaseBulletSpeedByPercentage(0.01f);
+                    else
+                        Debug.LogWarning("CardManager: shooter is null for BulletSpeed.");
                     break;
                 case CardEffectType.PlayerHP:
                     // TODO: Player effect affect.
                     break;
                 case CardEffectType.Damage:
-                    if (shooter != null) shooter.IncreaseBulletDamge(5f);
+                    if (shooter1911 != null)
+                        shooter1911.IncreaseBulletDamge(5f);
+                    else if (shooterM1A1 != null)
+                        shooterM1A1.IncreaseBulletDamge(1f);
+                    else
+                        Debug.LogWarning("CardManager: shooter is null for Damage.");
                     break;
                 case CardEffectType.FrostBullet:
                     // TODO: FrostBullet effect
@@ -122,28 +142,28 @@ public class Card : MonoBehaviour
                     break;
             }
 
-            // ²ÄÖÊÇÐ»»
+            // ï¿½ï¿½ï¿½ï¿½ï¿½Ð»ï¿½
             if (objectRenderer != null && selectedMaterial != null)
                 objectRenderer.material = selectedMaterial;
 
-            // ²¥·ÅÑ¡ÖÐÌØÐ§
+            // ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½ï¿½Ð§
             if (selectedPartical != null)
             {
                 ParticleSystem effect = Instantiate(selectedPartical, transform.position, Quaternion.identity, transform);
                 effect.Play();
             }
 
-            // ²¥·Å¶¯»­
+            // ï¿½ï¿½ï¿½Å¶ï¿½ï¿½ï¿½
             StartFadeOut();
 
-            // Í¨Öª¹ÜÀíÆ÷Ñ¡ÖÐ
+            // Í¨Öªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½
             if (_manager != null)
                 _manager.NotifySelected(this);
 
-            // Ïú»Ù×Óµ¯
+            // ï¿½ï¿½ï¿½ï¿½ï¿½Óµï¿½
             Destroy(bullet.gameObject);
 
-            // Ïú»Ù×ÔÉí
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             Destroy(gameObject, 4f);
         }
     }

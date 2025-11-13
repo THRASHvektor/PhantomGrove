@@ -41,6 +41,7 @@ public class TargetBall : MonoBehaviour
 
     private float originalMoveSpeed;
     private MonsterChase monsterChase;
+    private bool isDead = false;
 
     void Awake()
     {
@@ -132,13 +133,15 @@ public class TargetBall : MonoBehaviour
     }
 
     /// <summary>
-    /// ÓÉ×Óµ¯µ÷ÓÃ£¬Ôì³ÉÉËº¦ºÍ·´À¡
+    /// ï¿½ï¿½ï¿½Óµï¿½ï¿½ï¿½ï¿½Ã£ï¿½ï¿½ï¿½ï¿½ï¿½Ëºï¿½ï¿½Í·ï¿½ï¿½ï¿½
     /// </summary>
     public void ApplyDamageImmediate(BulletBehavior bb)
     {
+        if (isDead) return;
+
         currentHealth -= bb.damage;
 
-        // º®±ùÐ§¹û
+        // ï¿½ï¿½ï¿½ï¿½Ð§ï¿½ï¿½
         if (bb.isFrostBullet)
         {
             ApplyOrRefreshFrost(bb.frostTime, bb.speedSlowRate);
@@ -148,6 +151,13 @@ public class TargetBall : MonoBehaviour
 
         if (currentHealth <= 0)
         {
+            isDead = true;
+            // disable colliders to avoid receiving further triggers during the destroy delay
+            foreach (var col in GetComponentsInChildren<Collider>(true))
+            {
+                if (col != null) col.enabled = false;
+            }
+
             if (healthBarCanvas != null)
                 healthBarCanvas.gameObject.SetActive(false);
 
@@ -167,7 +177,7 @@ public class TargetBall : MonoBehaviour
     }
 
     /// <summary>
-    /// ÓÉ×Óµ¯µ÷ÓÃ£¬Ôì³É»÷ÍË
+    /// ï¿½ï¿½ï¿½Óµï¿½ï¿½ï¿½ï¿½Ã£ï¿½ï¿½ï¿½É»ï¿½ï¿½ï¿½
     /// </summary>
     public void ApplyKnockback(Vector3 direction, float force)
     {
@@ -179,7 +189,7 @@ public class TargetBall : MonoBehaviour
     }
 
     /// <summary>
-    /// º®±ù¼õËÙÐ§¹û
+    /// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð§ï¿½ï¿½
     /// </summary>
     public void ApplyOrRefreshFrost(float frostTime, float speedSlowRate)
     {

@@ -29,6 +29,10 @@ public class M1911 : MonoBehaviour
     /// </summary>
     public float bulletLifetime = 5f;
     /// <summary>
+    /// Damage of the bullet.
+    /// </summary>
+    public float bulletDamage = 10f;
+    /// <summary>
     /// Transform representing the barrel pivot / muzzle position and rotation.
     /// </summary>
     public Transform barrelPivot;
@@ -108,7 +112,7 @@ public class M1911 : MonoBehaviour
     private Dictionary<Collider, bool> originalIsTrigger = new Dictionary<Collider, bool>();
 
     private bool savedConstraints;
-    private float bulletDamage = 10f;
+    
 
     public GameObject initText;
 
@@ -139,7 +143,7 @@ public class M1911 : MonoBehaviour
         if (interactable != null && interactable.attachedToHand != null)
         {
             var source = interactable.attachedToHand.handType;
-            initText.SetActive(false);
+            //initText.SetActive(false);
             if (fireAction != null && fireAction[source].stateDown)
             {
                 float now = Time.time;

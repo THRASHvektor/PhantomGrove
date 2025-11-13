@@ -32,6 +32,13 @@ public class CardManager : MonoBehaviour
     /// <returns></returns>
     public IEnumerator ShowAndWaitSelection()
     {
+        // Prevent duplicate selection phases running at the same time
+        if (_awaitingSelection)
+        {
+            Debug.LogWarning("CardManager: ShowAndWaitSelection called while selection already in progress. Ignoring.");
+            yield break;
+        }
+
         if (cardPoints.Count == 0 || cardPrefabs == null)
         {
             Debug.LogWarning("CardManager: missing card points or prefabs. Skipping card phase.");
@@ -51,7 +58,7 @@ public class CardManager : MonoBehaviour
 
         ClearCards(clickedCard);
 
-        int count = Mathf.Min(3, cardPoints.Count); // Éú³ÉÈýÕÅ»ò²»³¬¹ýµãÎ»ÊýÁ¿
+        int count = Mathf.Min(3, cardPoints.Count); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å»ò²»³ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½ï¿½ï¿½
         for (int i = 0; i < count; i++)
         {
             var prefab = cardPrefabs;
@@ -62,7 +69,7 @@ public class CardManager : MonoBehaviour
             var behaviour = card.GetComponent<Card>();
             if (behaviour != null)
             {
-                behaviour.Initialize(this, all[i]); // Ö¸¶¨Ëæ»ú²»ÖØ¸´µÄÐ§¹û
+                behaviour.Initialize(this, all[i]); // Ö¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø¸ï¿½ï¿½ï¿½Ð§ï¿½ï¿½
             }
             else
             {
@@ -104,7 +111,33 @@ public class CardManager : MonoBehaviour
 
     public void NotifySelected(Card selectedCard)
     {
+        // Only accept selection if we are actually waiting for one
+        if (!_awaitingSelection)
+        {
+            Debug.LogWarning("CardManager: NotifySelected called but no selection is awaited. Ignoring.");
+            return;
+        }
+
         _awaitingSelection = false;
         clickedCard = selectedCard;
+
+        // Immediately prevent other cards from being selectable: disable their colliders and mark them selected
+        Card[] childCards = GetComponentsInChildren<Card>();
+        foreach (Card card in childCards)
+        {
+            if (card == null || card == selectedCard) continue;
+
+            // mark as selected to prevent their OnTriggerEnter handler from doing anything
+            card.isSelect = true;
+
+            // disable any colliders on the card so bullets won't hit them
+            foreach (var col in card.GetComponentsInChildren<Collider>(true))
+            {
+                if (col != null) col.enabled = false;
+            }
+
+            // start fade/destroy sequence for non-selected cards
+            card.DestroyCard();
+        }
     }
 }

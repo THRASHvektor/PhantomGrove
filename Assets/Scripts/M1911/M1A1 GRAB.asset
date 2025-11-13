@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e90911e410742a1498a167540c7865bf, type: 3}
-  m_Name: M1911GrabFire
+  m_Name: M1A1 GRAB
   m_EditorClassIdentifier: 
   leftHand:
     inputSource: 1
@@ -21,7 +21,7 @@ MonoBehaviour:
     pinkyFingerMovementType: 0
     ignoreRootPoseData: 1
     ignoreWristPoseData: 1
-    position: {x: -0.0015000112, y: -0.031213768, z: -0.11858631}
+    position: {x: 0.0003000052, y: -0.024715647, z: -0.09011202}
     rotation: {x: -0.39083284, y: 0, z: -0.00000004470348, w: -0.9204617}
     bonePositions:
     - {x: -0, y: 0, z: 0}
@@ -96,7 +96,7 @@ MonoBehaviour:
     pinkyFingerMovementType: 0
     ignoreRootPoseData: 1
     ignoreWristPoseData: 1
-    position: {x: 0.0015000112, y: -0.031213768, z: -0.11858631}
+    position: {x: -0.0003000052, y: -0.024715647, z: -0.09011202}
     rotation: {x: 0.39083284, y: 0, z: -0.00000004470348, w: 0.9204617}
     bonePositions:
     - {x: -0, y: 0, z: 0}
@@ -140,7 +140,7 @@ MonoBehaviour:
     - {x: -0.6107428, y: -0.46056125, z: -0.51103806, w: 0.39206716}
     - {x: 0.0044301446, y: 0.08068324, z: -0.16371903, w: 0.9831921}
     - {x: 0.012934575, y: 0.0017988456, z: -0.36842296, w: 0.92956656}
-    - {x: -0.0062673, y: 0.0061147846, z: -0.8519052, w: 0.523623}
+    - {x: -0.006267299, y: 0.0061147837, z: -0.8519051, w: 0.52362293}
     - {x: 6.938894e-18, y: 1.9428903e-16, z: -1.348151e-33, w: 1}
     - {x: -0.52744097, y: -0.4827026, z: -0.46426627, w: 0.52274376}
     - {x: -0.18258247, y: 0.029573556, z: -0.33801252, w: 0.9227875}
