@@ -8,18 +8,18 @@ public class PlayerHealth : MonoBehaviour
     void Awake()
     {
         currentHealth = maxHealth;
-        Debug.Log("³õÊ¼ÑªÁ¿: " + currentHealth);
+        Debug.Log("ï¿½ï¿½Ê¼Ñªï¿½ï¿½: " + currentHealth);
     }
 
     public void TakeDamage(int amount)
     {
         currentHealth -= amount;
         currentHealth = Mathf.Max(currentHealth, 0);
-        Debug.Log("µ±Ç°ÑªÁ¿: " + currentHealth);
+        Debug.Log("ï¿½ï¿½Ç°Ñªï¿½ï¿½: " + currentHealth);
 
         if (currentHealth <= 0)
         {
-            Debug.Log("ÑªÁ¿Îª0£¬ÓÎÏ·ÍË³ö£¡");
+            Debug.Log("Ñªï¿½ï¿½Îª0ï¿½ï¿½ï¿½ï¿½Ï·ï¿½Ë³ï¿½ï¿½ï¿½");
 #if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;
 #else

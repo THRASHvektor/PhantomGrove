@@ -17,13 +17,13 @@ public class BulletBehavior : MonoBehaviour
     public bool isFrostBullet = false;    // �Ƿ�Ϊ�����ӵ�
     public float frostTime = 2f;          // ��������ʱ��
     public float speedSlowRate = 0.1f;    // ������ٱ���
+    [Header("Fire Bullet Settings")]
+    public bool isFireBullet = false;     // 是否火焰子弹
+    public float fireDuration = 3f;       // 火焰持续时间（秒）
+    public float fireDamagePerSecond = 1f; // 每秒持续伤害
     [Header("Critical")]
     public bool isCritBullet = false;     // 是否暴击子弹
 
-    public void InitCritBullet()
-    {
-        this.isCritBullet = true;
-    }
 
     [Header("Shooter & Layer")]
     public GameObject shooter;            // ������
@@ -61,6 +61,18 @@ public class BulletBehavior : MonoBehaviour
         this.frostTime = frostTime;
         this.speedSlowRate = speedSlowRate;
         this.isFrostBullet = true;
+    }
+
+    public void InitFireBullet(float duration, float dps)
+    {
+        this.fireDuration = duration;
+        this.fireDamagePerSecond = dps;
+        this.isFireBullet = true;
+    }
+
+    public void InitCritBullet()
+    {
+        this.isCritBullet = true;
     }
 
     /// <summary>

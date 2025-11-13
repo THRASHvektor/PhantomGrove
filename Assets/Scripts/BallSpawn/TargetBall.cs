@@ -38,6 +38,11 @@ public class TargetBall : MonoBehaviour
     private Coroutine frostCo;
     private Coroutine frostFeedbackCo;
     private Coroutine hitCo;
+    private float burnExpireTime;
+    private Coroutine burnCo;
+    private float activeBurnDPS = 0f;
+    [Header("Fire / Burn")]
+    public Color fireColor = Color.red;
 
     private float originalMoveSpeed;
     private MonsterChase monsterChase;
@@ -165,6 +170,20 @@ public class TargetBall : MonoBehaviour
             }
         }
 
+        // Fire / burn effect: applies a DOT over time (duration & DPS come from the bullet)
+        if (bb.isFireBullet)
+        {
+            ApplyOrRefreshBurn(bb.fireDuration, bb.fireDamagePerSecond);
+            // Notify shooter (weapon) that a fire bullet actually hit so it can start fire cooldown.
+            if (bb.shooter != null)
+            {
+                var w1 = bb.shooter.GetComponent<M1911>();
+                if (w1 != null) w1.StartFireCooldown();
+                var w2 = bb.shooter.GetComponent<M1A1>();
+                if (w2 != null) w2.StartFireCooldown();
+            }
+        }
+
         // Spawn damage popup at hit point if prefab set
         if (damageTextPrefab != null)
         {
@@ -180,8 +199,11 @@ public class TargetBall : MonoBehaviour
             {
                 string dmgText = ((int)appliedDamage).ToString();
                 Color c;
+                // Priority: crit > fire > frost > normal
                 if (bb.isCritBullet)
                     c = new Color(1f, 0.5f, 0f); // orange for crit
+                else if (bb.isFireBullet)
+                    c = fireColor;
                 else if (bb.isFrostBullet)
                     c = frostColor;
                 else
@@ -239,6 +261,84 @@ public class TargetBall : MonoBehaviour
 
         if (hitCo != null) StopCoroutine(hitCo);
         hitCo = StartCoroutine(HitFeedbackRoutine());
+    }
+
+    /// <summary>
+    /// Apply or refresh a burning DOT effect.
+    /// </summary>
+    public void ApplyOrRefreshBurn(float duration, float dps)
+    {
+        var now = Time.time;
+        burnExpireTime = now + Mathf.Max(0f, duration);
+        activeBurnDPS = Mathf.Max(0f, dps);
+
+        if (burnCo != null)
+            StopCoroutine(burnCo);
+        burnCo = StartCoroutine(BurnRoutine());
+        Debug.Log($"[TargetBall] Apply burn to {gameObject.name}: duration={duration} dps={dps}");
+    }
+
+    private IEnumerator BurnRoutine()
+    {
+        // Wait a short moment before first tick so the initial hit shows separately
+        while (Time.time < burnExpireTime)
+        {
+            // 1-second tick
+            float remaining = burnExpireTime - Time.time;
+            if (remaining <= 0f) break;
+            float wait = Mathf.Min(1f, remaining);
+            yield return new WaitForSeconds(wait);
+
+            if (isDead) break;
+
+            // apply one second worth of damage (if wait < 1, apply proportionally)
+            float applied = activeBurnDPS * wait;
+            currentHealth -= applied;
+
+            // spawn red damage popup for burn tick
+            if (damageTextPrefab != null)
+            {
+                Vector3 pos = transform.position + Vector3.up * 0.2f;
+                var go = Instantiate(damageTextPrefab, pos, Quaternion.identity);
+                if (Camera.main != null) go.transform.rotation = Camera.main.transform.rotation;
+                go.transform.localScale = Vector3.one;
+                var popup = go.GetComponent<DamagePopup>();
+                if (popup != null)
+                {
+                    string dmgText = ((int)applied).ToString();
+                    popup.Init(dmgText, fireColor);
+                }
+                else
+                {
+                    var tmp = go.GetComponent<TMPro.TextMeshPro>();
+                    if (tmp != null)
+                    {
+                        tmp.text = ((int)applied).ToString();
+                        tmp.color = fireColor;
+                        Destroy(go, 1f);
+                    }
+                }
+                Debug.Log($"[TargetBall] Burn tick {applied} on {gameObject.name}");
+            }
+
+            UpdateHealthBar();
+
+            if (currentHealth <= 0f)
+            {
+                isDead = true;
+                foreach (var col in GetComponentsInChildren<Collider>(true))
+                {
+                    if (col != null) col.enabled = false;
+                }
+                if (healthBarCanvas != null) healthBarCanvas.gameObject.SetActive(false);
+                if (spawner != null) spawner.NotifyBallDestroyed(this);
+                Destroy(gameObject, 0.2f);
+                break;
+            }
+        }
+
+        burnCo = null;
+        Debug.Log($"[TargetBall] Burn ended on {gameObject.name}");
     }
 
     /// <summary>

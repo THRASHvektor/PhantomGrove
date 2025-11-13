@@ -10446,6 +10446,12 @@ MonoBehaviour:
   frostShotChance: 0
   frostTime: 2
   speedSlowRate: 0.1
+  fireShotChance: 0
+  fireDuration: 3
+  fireDamagePerSecond: 1
+  fireCooldownOnHit: 10
+  critChance: 0
+  frostCooldownOnHit: 1
   initText: {fileID: 0}
 --- !u!114 &1298334115
 MonoBehaviour:
@@ -13286,11 +13292,11 @@ MonoBehaviour:
   poseEditorExpanded: 1
   blendEditorExpanded: 1
   poseNames:
-  - M1911Grab (MAIN)
+  - M1911GrabFire 1 (MAIN)
   - M1911GrabFire 1
   overridePreviewLeftHandPrefab: {fileID: 1000013348574242, guid: 638779290bce1af49b356f33dcc6fccf, type: 3}
   overridePreviewRightHandPrefab: {fileID: 1000010304998954, guid: 6def53d002137b747aec0b29551e0e25, type: 3}
-  skeletonMainPose: {fileID: 11400000, guid: 7d04a3dfb7d7c0646a0c1b71c6022d9c, type: 2}
+  skeletonMainPose: {fileID: 11400000, guid: 476a7e77f53f489439bfd0d1bd8fca53, type: 2}
   skeletonAdditionalPoses:
   - {fileID: 11400000, guid: 476a7e77f53f489439bfd0d1bd8fca53, type: 2}
   showLeftPreview: 0
@@ -13353,7 +13359,13 @@ MonoBehaviour:
   doubleShotDelay: 0.1
   frostShotChance: 0
   frostTime: 2
-  speedSlowRate: 1
+  speedSlowRate: 0.5
+  fireShotChance: 0
+  fireDuration: 3
+  fireDamagePerSecond: 1
+  fireCooldownOnHit: 10
+  critChance: 0
+  frostCooldownOnHit: 1
   initText: {fileID: 0}
 --- !u!65 &1652693036
 BoxCollider:

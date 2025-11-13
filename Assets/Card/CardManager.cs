@@ -54,6 +54,7 @@ public class CardManager : MonoBehaviour
         //CardEffectType.PlayerHP
         CardEffectType.Damage,
         CardEffectType.FrostBullet,
+        CardEffectType.FireBullet,
         CardEffectType.Critical,
     };
         Shuffle(all);

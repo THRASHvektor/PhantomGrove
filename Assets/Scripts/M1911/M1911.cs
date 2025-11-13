@@ -103,6 +103,19 @@ public class M1911 : MonoBehaviour
     /// </summary>
     [Range(0f, 1f)]
     public float speedSlowRate = 0.1f;
+    [Header("FireShot")]
+    [Tooltip("Probability (0..1) that a fired shot will be a fire bullet.")]
+    public float fireShotChance = 0f;
+    public float fireDuration = 3f;
+    public float fireDamagePerSecond = 1f;
+    [Tooltip("Cooldown (seconds) after a fire bullet successfully applies burn on a target")]
+    public float fireCooldownOnHit = 10f;
+
+    public void IncreaseFireChanceByAbsolute(float amount)
+    {
+        fireShotChance = Mathf.Clamp01(fireShotChance + amount);
+        Debug.Log($"[M1911] Fire chance increased to {fireShotChance}");
+    }
     [Header("Critical")]
     [Tooltip("Chance (0..1) for a bullet to be a critical hit. Cards can increase this.")]
     public float critChance = 0f; // initial probability 0
@@ -120,6 +133,8 @@ public class M1911 : MonoBehaviour
 
     // Time until this weapon is allowed to create another frost bullet (set on frost HIT)
     private float _nextAllowedFrostTime = 0f;
+    // Time until this weapon is allowed to create another fire bullet (set on fire HIT)
+    private float _nextAllowedFireTime = 0f;
 
     private Interactable interactable;
     private Animator animator;
@@ -226,13 +241,25 @@ public class M1911 : MonoBehaviour
                 // Frost chance rolled but weapon is on post-hit frost cooldown; skip making this bullet frost.
                 Debug.Log("Frost suppressed due to weapon frost cooldown.");
             }
-            // Critical roll (independent of frost)
-            if (Random.value <= critChance)
-            {
-                bb.isCritBullet = true;
-                bb.InitCritBullet();
-                Debug.Log("Crit Bullet Shotted!");
-            }
+                // Fire roll (independent)
+                if (Random.value <= fireShotChance && Time.time >= _nextAllowedFireTime)
+                {
+                    bb.isFireBullet = true;
+                    bb.InitFireBullet(fireDuration, fireDamagePerSecond);
+                    Debug.Log("Fire Bullet Shotted!");
+                }
+                else if (Random.value <= fireShotChance && Time.time < _nextAllowedFireTime)
+                {
+                    Debug.Log("Fire suppressed due to weapon fire cooldown.");
+                }
+
+                // Critical roll (independent of frost/fire)
+                if (Random.value <= critChance)
+                {
+                    bb.isCritBullet = true;
+                    bb.InitCritBullet();
+                    Debug.Log("Crit Bullet Shotted!");
+                }
         }
         Destroy(bulletInstance, bulletLifetime);
 
@@ -354,6 +381,17 @@ public class M1911 : MonoBehaviour
         float dur = seconds > 0f ? seconds : frostCooldownOnHit;
         _nextAllowedFrostTime = Time.time + dur;
         Debug.Log($"[M1911] Frost cooldown started for {dur}s (until {_nextAllowedFrostTime:F2})");
+    }
+
+    /// <summary>
+    /// Called when a fired fire bullet actually hits a target. Starts the fire cooldown
+    /// so subsequent fired bullets won't be fire for the cooldown duration.
+    /// </summary>
+    public void StartFireCooldown(float seconds = 0f)
+    {
+        float dur = seconds > 0f ? seconds : fireCooldownOnHit;
+        _nextAllowedFireTime = Time.time + dur;
+        Debug.Log($"[M1911] Fire cooldown started for {dur}s (until {_nextAllowedFireTime:F2})");
     }
 
     /// <summary>

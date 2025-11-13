@@ -44,6 +44,20 @@ public class M1A1 : MonoBehaviour
     public float frostShotChance = 0.02f;
     public float frostTime = 2f;
     public float speedSlowRate = 0.1f;
+    [Header("FireShot")]
+    [Tooltip("Probability (0..1) that a fired shot will be a fire bullet.")]
+    public float fireShotChance = 0f;
+    public float fireDuration = 3f;
+    public float fireDamagePerSecond = 1f;
+
+    [Tooltip("Cooldown (seconds) after a fire bullet successfully applies burn on a target")]
+    public float fireCooldownOnHit = 10f;
+
+    public void IncreaseFireChanceByAbsolute(float amount)
+    {
+        fireShotChance = Mathf.Clamp01(fireShotChance + amount);
+        Debug.Log($"[M1A1] Fire chance increased to {fireShotChance}");
+    }
     [Header("Critical")]
     [Tooltip("Chance (0..1) for a bullet to be a critical hit. Cards can increase this.")]
     public float critChance = 0f;
@@ -59,6 +73,8 @@ public class M1A1 : MonoBehaviour
     public float frostCooldownOnHit = 1f;
 
     private float _nextAllowedFrostTime = 0f;
+    // Time until this weapon is allowed to create another fire bullet (set on fire HIT)
+    private float _nextAllowedFireTime = 0f;
 
     private Interactable interactable;
     private Animator animator;
@@ -145,13 +161,25 @@ public class M1A1 : MonoBehaviour
             {
                 Debug.Log("M1A1 frost suppressed due to weapon frost cooldown.");
             }
-            // Critical roll
-            if (Random.value <= critChance)
-            {
-                bb.isCritBullet = true;
-                bb.InitCritBullet();
-                Debug.Log("M1A1 Crit Bullet Shotted!");
-            }
+                // Fire roll
+                if (Random.value <= fireShotChance && Time.time >= _nextAllowedFireTime)
+                {
+                    bb.isFireBullet = true;
+                    bb.InitFireBullet(fireDuration, fireDamagePerSecond);
+                    Debug.Log("M1A1 Fire Bullet Shotted!");
+                }
+                else if (Random.value <= fireShotChance && Time.time < _nextAllowedFireTime)
+                {
+                    Debug.Log("M1A1 fire suppressed due to weapon fire cooldown.");
+                }
+
+                // Critical roll
+                if (Random.value <= critChance)
+                {
+                    bb.isCritBullet = true;
+                    bb.InitCritBullet();
+                    Debug.Log("M1A1 Crit Bullet Shotted!");
+                }
         }
         Destroy(bulletInstance, bulletLifetime);
 
@@ -220,6 +248,17 @@ public class M1A1 : MonoBehaviour
         float dur = seconds > 0f ? seconds : frostCooldownOnHit;
         _nextAllowedFrostTime = Time.time + dur;
         Debug.Log($"[M1A1] Frost cooldown started for {dur}s (until {_nextAllowedFrostTime:F2})");
+    }
+
+    /// <summary>
+    /// Called when a fired fire bullet actually hits a target. Starts the fire cooldown
+    /// so subsequent fired bullets won't be fire for the cooldown duration.
+    /// </summary>
+    public void StartFireCooldown(float seconds = 0f)
+    {
+        float dur = seconds > 0f ? seconds : fireCooldownOnHit;
+        _nextAllowedFireTime = Time.time + dur;
+        Debug.Log($"[M1A1] Fire cooldown started for {dur}s (until {_nextAllowedFireTime:F2})");
     }
 
     public float GetDoubleShotChance() => doubleShotChance;
