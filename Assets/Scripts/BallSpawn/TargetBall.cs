@@ -51,6 +51,9 @@ public class TargetBall : MonoBehaviour
     [Tooltip("Prefab for floating damage text. Should have a TextMeshPro component or DamagePopup script on root.")]
     public GameObject damageTextPrefab;
 
+    
+    private MonsterSound monsterSound;
+
     void Awake()
     {
         monsterChase = GetComponent<MonsterChase>();
@@ -58,7 +61,7 @@ public class TargetBall : MonoBehaviour
         {
             originalMoveSpeed = monsterChase.moveSpeed;
         }
-
+        monsterSound = GetComponent<MonsterSound>();
         renderers = GetComponentsInChildren<Renderer>(true);
         originalColors = new Color[renderers.Length];
         for (int i = 0; i < renderers.Length; i++)
@@ -150,6 +153,12 @@ public class TargetBall : MonoBehaviour
 
         float appliedDamage = bb.isCritBullet ? bb.damage * 2f : bb.damage;
         currentHealth -= appliedDamage;
+        // 新增：受伤音效
+        if (monsterSound != null)
+        {
+            monsterSound.PlayHurt();
+        }
+
 
         // Start hit feedback immediately so frost feedback waits for it.
         if (hitCo != null) StopCoroutine(hitCo);
@@ -238,7 +247,14 @@ public class TargetBall : MonoBehaviour
 
         if (currentHealth <= 0)
         {
+            // 新增：死亡音效（只播一次）
+            if (!isDead && monsterSound != null)
+            {
+                monsterSound.PlayDeath();
+            }
+
             isDead = true;
+
             // disable colliders to avoid receiving further triggers during the destroy delay
             foreach (var col in GetComponentsInChildren<Collider>(true))
             {
