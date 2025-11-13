@@ -11,7 +11,7 @@ public class Card : MonoBehaviour
     public TextMeshPro cardText;
     public string Text;
 
-    public enum CardEffectType { DoubleShot, FireRate, BulletSpeed, FrostBullet, FrostTime, Damage, PlayerHP }
+    public enum CardEffectType { DoubleShot, FireRate, BulletSpeed, FrostBullet, FrostTime, Damage, Critical, PlayerHP }
 
     private Renderer objectRenderer;
     private Animator animator;
@@ -50,6 +50,9 @@ public class Card : MonoBehaviour
                 break;
             case CardEffectType.FrostTime:
                 cardText.text = "Frost Time +2s";
+                break;
+            case CardEffectType.Critical:
+                cardText.text = "Crit Chance +5%";
                 break;
             case CardEffectType.Damage:
                 cardText.text = "Bullet Damage +5";
@@ -141,6 +144,14 @@ public class Card : MonoBehaviour
                     break;
                 case CardEffectType.FrostTime:
                     // TODO: FrostTime effect
+                    break;
+                case CardEffectType.Critical:
+                    if (shooter1911 != null)
+                        shooter1911.IncreaseCritChanceByAbsolute(0.05f);
+                    else if (shooterM1A1 != null)
+                        shooterM1A1.IncreaseCritChanceByAbsolute(0.05f);
+                    else
+                        Debug.LogWarning("CardManager: shooter is null for Critical.");
                     break;
             }
 

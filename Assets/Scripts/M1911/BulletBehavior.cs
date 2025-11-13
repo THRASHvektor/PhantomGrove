@@ -17,6 +17,13 @@ public class BulletBehavior : MonoBehaviour
     public bool isFrostBullet = false;    // �Ƿ�Ϊ�����ӵ�
     public float frostTime = 2f;          // ��������ʱ��
     public float speedSlowRate = 0.1f;    // ������ٱ���
+    [Header("Critical")]
+    public bool isCritBullet = false;     // 是否暴击子弹
+
+    public void InitCritBullet()
+    {
+        this.isCritBullet = true;
+    }
 
     [Header("Shooter & Layer")]
     public GameObject shooter;            // ������

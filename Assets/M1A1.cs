@@ -44,6 +44,15 @@ public class M1A1 : MonoBehaviour
     public float frostShotChance = 0.02f;
     public float frostTime = 2f;
     public float speedSlowRate = 0.1f;
+    [Header("Critical")]
+    [Tooltip("Chance (0..1) for a bullet to be a critical hit. Cards can increase this.")]
+    public float critChance = 0f;
+
+    public void IncreaseCritChanceByAbsolute(float amount)
+    {
+        critChance = Mathf.Clamp01(critChance + amount);
+        Debug.Log($"[M1A1] Crit chance increased to {critChance}");
+    }
     /// <summary>
     /// Frost hit cooldown (seconds) to apply after a frost bullet actually hits a target.
     /// </summary>
@@ -135,6 +144,13 @@ public class M1A1 : MonoBehaviour
             else if (Random.value <= frostShotChance && Time.time < _nextAllowedFrostTime)
             {
                 Debug.Log("M1A1 frost suppressed due to weapon frost cooldown.");
+            }
+            // Critical roll
+            if (Random.value <= critChance)
+            {
+                bb.isCritBullet = true;
+                bb.InitCritBullet();
+                Debug.Log("M1A1 Crit Bullet Shotted!");
             }
         }
         Destroy(bulletInstance, bulletLifetime);

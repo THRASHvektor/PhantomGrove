@@ -143,7 +143,8 @@ public class TargetBall : MonoBehaviour
     {
         if (isDead) return;
 
-        currentHealth -= bb.damage;
+        float appliedDamage = bb.isCritBullet ? bb.damage * 2f : bb.damage;
+        currentHealth -= appliedDamage;
 
         // Start hit feedback immediately so frost feedback waits for it.
         if (hitCo != null) StopCoroutine(hitCo);
@@ -177,8 +178,14 @@ public class TargetBall : MonoBehaviour
             var popup = go.GetComponent<DamagePopup>();
             if (popup != null)
             {
-                string dmgText = ((int)bb.damage).ToString();
-                Color c = bb.isFrostBullet ? frostColor : Color.white;
+                string dmgText = ((int)appliedDamage).ToString();
+                Color c;
+                if (bb.isCritBullet)
+                    c = new Color(1f, 0.5f, 0f); // orange for crit
+                else if (bb.isFrostBullet)
+                    c = frostColor;
+                else
+                    c = Color.white;
                 popup.Init(dmgText, c);
                 Debug.Log($"[TargetBall] Spawned DamagePopup '{dmgText}' color={c} at {hitPoint}");
             }
@@ -188,8 +195,13 @@ public class TargetBall : MonoBehaviour
                 var tmp = go.GetComponent<TMPro.TextMeshPro>();
                 if (tmp != null)
                 {
-                    tmp.text = ((int)bb.damage).ToString();
-                    tmp.color = bb.isFrostBullet ? frostColor : Color.white;
+                    tmp.text = ((int)appliedDamage).ToString();
+                    if (bb.isCritBullet)
+                        tmp.color = new Color(1f, 0.5f, 0f);
+                    else if (bb.isFrostBullet)
+                        tmp.color = frostColor;
+                    else
+                        tmp.color = Color.white;
                     Destroy(go, 1f);
                     Debug.Log($"[TargetBall] Spawned TMP damage text '{tmp.text}' color={tmp.color} at {hitPoint}");
                 }

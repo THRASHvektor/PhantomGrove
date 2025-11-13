@@ -103,6 +103,15 @@ public class M1911 : MonoBehaviour
     /// </summary>
     [Range(0f, 1f)]
     public float speedSlowRate = 0.1f;
+    [Header("Critical")]
+    [Tooltip("Chance (0..1) for a bullet to be a critical hit. Cards can increase this.")]
+    public float critChance = 0f; // initial probability 0
+
+    public void IncreaseCritChanceByAbsolute(float amount)
+    {
+        critChance = Mathf.Clamp01(critChance + amount);
+        Debug.Log($"[M1911] Crit chance increased to {critChance}");
+    }
     /// <summary>
     /// When a frost bullet actually hits a target, start this cooldown on the weapon
     /// so subsequent shots can't apply frost for this many seconds.
@@ -216,6 +225,13 @@ public class M1911 : MonoBehaviour
             {
                 // Frost chance rolled but weapon is on post-hit frost cooldown; skip making this bullet frost.
                 Debug.Log("Frost suppressed due to weapon frost cooldown.");
+            }
+            // Critical roll (independent of frost)
+            if (Random.value <= critChance)
+            {
+                bb.isCritBullet = true;
+                bb.InitCritBullet();
+                Debug.Log("Crit Bullet Shotted!");
             }
         }
         Destroy(bulletInstance, bulletLifetime);
