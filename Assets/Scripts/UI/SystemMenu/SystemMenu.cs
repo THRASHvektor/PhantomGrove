@@ -33,14 +33,7 @@ public class SystemMenu : MonoBehaviour
         Debug.LogWarning("ResumeGame!!");
         Time.timeScale = 1f;
         Destroy(transform.parent.gameObject);
-        if (leftHand)
-        {
-            leftHand.GetComponent<Valve.VR.InteractionSystem.UI_LaserPointer>().enabled = false;
-        }
-        if (rightHand)
-        {
-            rightHand.GetComponent<Valve.VR.InteractionSystem.UI_LaserPointer>().enabled = false;
-        }
+        
     }
 
     public void ExitGame()
@@ -55,9 +48,25 @@ public class SystemMenu : MonoBehaviour
 
      public void RestartGame()
     {
-        // 确保游戏未被暂停
         Time.timeScale = 1f;
-        // 重新载入当前场景（同步）
+        // Destroy this menu instance (it may be parented under a persistent SteamVR object)
+        GameObject menuRoot = transform.parent != null ? transform.parent.gameObject : gameObject;
+        Destroy(menuRoot);
+
+        // Destroy persistent SteamVR Player if present to avoid duplicate hands after reload
+        var svPlayer = FindObjectOfType<Valve.VR.InteractionSystem.Player>();
+        if (svPlayer != null)
+        {
+            Destroy(svPlayer.gameObject);
+        }
+
+        // Also attempt to destroy common SteamVR root objects that may be marked DontDestroyOnLoad
+        var steamVrRoot = GameObject.Find("SteamVRObjects");
+        if (steamVrRoot != null)
+        {
+            Destroy(steamVrRoot);
+        }
+
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 

@@ -42,6 +42,7 @@ public class M1A1 : MonoBehaviour
     [Header("FrostShot")]
     [Range(0f, 1f)]
     public float frostShotChance = 0.02f;
+    public void IncreaseFrostChanceByAbsolute(float chance) { frostShotChance += chance; }
     public float frostTime = 2f;
     public float speedSlowRate = 0.1f;
     [Header("FireShot")]
