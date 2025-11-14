@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting.Dependencies.Sqlite;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class SystemMenu : MonoBehaviour
 {
@@ -50,6 +51,14 @@ public class SystemMenu : MonoBehaviour
 #else
         Application.Quit();
 #endif
+    }
+
+     public void RestartGame()
+    {
+        // 确保游戏未被暂停
+        Time.timeScale = 1f;
+        // 重新载入当前场景（同步）
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
 }

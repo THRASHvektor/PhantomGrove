@@ -247,9 +247,6 @@
             },
             {
                "inputs" : {
-                  "east" : {
-                     "output" : "/actions/default/in/snapturnright"
-                  },
                   "north" : {
                      "output" : "/actions/default/in/teleport"
                   },
@@ -262,6 +259,26 @@
                   "sub_mode" : "touch"
                },
                "path" : "/user/hand/right/input/joystick"
+            },
+            {
+               "inputs" : {
+                  "position" : {
+                     "output" : "/actions/default/in/turn"
+                  }
+               },
+               "mode" : "joystick",
+               "parameters" : {},
+               "path" : "/user/hand/right/input/joystick"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/default/in/openmenu"
+                  }
+               },
+               "mode" : "button",
+               "parameters" : {},
+               "path" : "/user/hand/left/input/x"
             }
          ]
       },
@@ -328,7 +345,7 @@
    "controller_type" : "oculus_touch",
    "description" : "",
    "interaction_profile" : "",
-   "name" : "oculus_touch",
+   "name" : "Saved [Testing] PhantomVR configuration for Oculus Touch Controller",
    "options" : {},
    "simulated_actions" : []
 }
