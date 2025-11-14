@@ -73,8 +73,8 @@ namespace Valve.VR.InteractionSystem
 		private Hand pointerHand = null;
 		private Player player = null;
 		private TeleportArc teleportArc = null;
-
-		private bool visible = false;
+        private bool teleportHeld = false;
+        private bool visible = false;
 
 		private TeleportMarkerBase[] teleportMarkers;
 		private TeleportMarkerBase pointedAtTeleportMarker;
@@ -239,84 +239,93 @@ namespace Valve.VR.InteractionSystem
 		}
 
 
-		//-------------------------------------------------
-		void Update()
-		{
-			Hand oldPointerHand = pointerHand;
-			Hand newPointerHand = null;
+        //-------------------------------------------------
+        void Update()
+        {
+            Hand oldPointerHand = pointerHand;
+            Hand newPointerHand = null;
 
-			foreach ( Hand hand in player.hands )
-			{
-				if ( visible )
-				{
-					if ( WasTeleportButtonReleased( hand ) )
-					{
-						if ( pointerHand == hand ) //This is the pointer hand
-						{
-							TryTeleportPlayer();
-						}
-					}
-				}
+            // 1. 处理按下 / 松开
+            foreach (Hand hand in player.hands)
+            {
+                
+                if (WasTeleportButtonPressed(hand))
+                {
+                    teleportHeld = true;
+                    newPointerHand = hand;
+                }
 
-				if ( WasTeleportButtonPressed( hand ) )
-				{
-					newPointerHand = hand;
-				}
-			}
+                
+                if (visible && WasTeleportButtonReleased(hand))
+                {
+                    if (pointerHand == hand)
+                    {
+                        teleportHeld = false;
+                        TryTeleportPlayer();
+                    }
+                }
+            }
 
-			//If something is attached to the hand that is preventing teleport
-			if ( allowTeleportWhileAttached && !allowTeleportWhileAttached.teleportAllowed )
-			{
-				HidePointer();
-			}
-			else
-			{
-				if ( !visible && newPointerHand != null )
-				{
-					//Begin showing the pointer
-					ShowPointer( newPointerHand, oldPointerHand );
-				}
-				else if ( visible )
-				{
-					if ( newPointerHand == null && !IsTeleportButtonDown( pointerHand ) )
-					{
-						//Hide the pointer
-						HidePointer();
-					}
-					else if ( newPointerHand != null )
-					{
-						//Move the pointer to a new hand
-						ShowPointer( newPointerHand, oldPointerHand );
-					}
-				}
-			}
+            
+            if (allowTeleportWhileAttached && !allowTeleportWhileAttached.teleportAllowed)
+            {
+                teleportHeld = false;
+                HidePointer();
+            }
+            else
+            {
+                // 3. 控制指针显隐
+                if (!visible)
+                {
+                    
+                    if (teleportHeld && newPointerHand != null)
+                    {
+                        ShowPointer(newPointerHand, oldPointerHand);
+                    }
+                }
+                else // visible == true
+                {
+                    
+                    if (!teleportHeld)
+                    {
+                        HidePointer();
+                    }
+                    else if (newPointerHand != null && newPointerHand != pointerHand)
+                    {
+                        
+                        ShowPointer(newPointerHand, oldPointerHand);
+                    }
+                }
+            }
 
-			if ( visible )
-			{
-				UpdatePointer();
+          
+            if (visible)
+            {
+                UpdatePointer();
 
-				if ( meshFading )
-				{
-					UpdateTeleportColors();
-				}
+                if (meshFading)
+                {
+                    UpdateTeleportColors();
+                }
 
-				if ( onActivateObjectTransform.gameObject.activeSelf && Time.time - pointerShowStartTime > activateObjectTime )
-				{
-					onActivateObjectTransform.gameObject.SetActive( false );
-				}
-			}
-			else
-			{
-				if ( onDeactivateObjectTransform.gameObject.activeSelf && Time.time - pointerHideStartTime > deactivateObjectTime )
-				{
-					onDeactivateObjectTransform.gameObject.SetActive( false );
-				}
-			}
-		}
+                if (onActivateObjectTransform.gameObject.activeSelf && Time.time - pointerShowStartTime > activateObjectTime)
+                {
+                    onActivateObjectTransform.gameObject.SetActive(false);
+                }
+            }
+            else
+            {
+                if (onDeactivateObjectTransform.gameObject.activeSelf && Time.time - pointerHideStartTime > deactivateObjectTime)
+                {
+                    onDeactivateObjectTransform.gameObject.SetActive(false);
+                }
+            }
+        }
 
 
-		//-------------------------------------------------
-		private void UpdatePointer()
+
+        //-------------------------------------------------
+        private void UpdatePointer()
 		{
 			Vector3 pointerStart = pointerStartTransform.position;
 			Vector3 pointerEnd;
@@ -1035,53 +1044,24 @@ namespace Valve.VR.InteractionSystem
 		}
 
 
-		//-------------------------------------------------
-		public bool IsEligibleForTeleport( Hand hand )
-		{
-			if ( hand == null )
-			{
-				return false;
-			}
+       
+        public bool IsEligibleForTeleport(Hand hand)
+        {
+            
+            if (hand == null)
+                return false;
 
-			if ( !hand.gameObject.activeInHierarchy )
-			{
-				return false;
-			}
+            
+            if (!hand.gameObject.activeInHierarchy)
+                return false;
 
-			if ( hand.hoveringInteractable != null )
-			{
-				return false;
-			}
-
-			if ( hand.noSteamVRFallbackCamera == null )
-			{
-				if ( hand.isActive == false)
-				{
-					return false;
-				}
-
-				//Something is attached to the hand
-				if ( hand.currentAttachedObject != null )
-				{
-					AllowTeleportWhileAttachedToHand allowTeleportWhileAttachedToHand = hand.currentAttachedObject.GetComponent<AllowTeleportWhileAttachedToHand>();
-
-					if ( allowTeleportWhileAttachedToHand != null && allowTeleportWhileAttachedToHand.teleportAllowed == true )
-					{
-						return true;
-					}
-					else
-					{
-						return false;
-					}
-				}
-			}
-
-			return true;
-		}
+            
+            return true;
+        }
 
 
-		//-------------------------------------------------
-		private bool ShouldOverrideHoverLock()
+        //-------------------------------------------------
+        private bool ShouldOverrideHoverLock()
 		{
 			if ( !allowTeleportWhileAttached || allowTeleportWhileAttached.overrideHoverLock )
 			{
