@@ -500,6 +500,15 @@ public class M1911 : MonoBehaviour
                 transform.SetParent(attach, /*worldPositionStays*/ true);
         }
 
+        // Ensure teleport is allowed while this weapon is attached to hand
+        var allowTeleport = GetComponent<AllowTeleportWhileAttachedToHand>();
+        if (allowTeleport == null)
+        {
+            allowTeleport = gameObject.AddComponent<AllowTeleportWhileAttachedToHand>();
+        }
+        allowTeleport.teleportAllowed = true;
+        allowTeleport.overrideHoverLock = true;
+
        
     }
 
