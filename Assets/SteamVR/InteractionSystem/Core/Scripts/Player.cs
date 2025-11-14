@@ -252,12 +252,23 @@ namespace Valve.VR.InteractionSystem
 		//-------------------------------------------------
 		private void Awake()
 		{
+			// 单例保护：如果已有实例且不是当前对象，则销毁当前对象，避免跨场景重复
+			if (_instance != null && _instance != this)
+			{
+				Destroy(gameObject);
+				return;
+			}
+
+			// 首个实例设为单例并在场景切换时保留
+			_instance = this;
+			DontDestroyOnLoad(gameObject);
+
 			if ( trackingOriginTransform == null )
 			{
 				trackingOriginTransform = this.transform;
 			}
 
-#if OPENVR_XR_API && UNITY_LEGACY_INPUT_HELPERS
+	#if OPENVR_XR_API && UNITY_LEGACY_INPUT_HELPERS
 			if (hmdTransforms != null)
 			{
 				foreach (var hmd in hmdTransforms)
@@ -266,17 +277,22 @@ namespace Valve.VR.InteractionSystem
 						hmd.gameObject.AddComponent<UnityEngine.SpatialTracking.TrackedPoseDriver>();
 				}
 			}
-#endif
+	#endif
 		}
 
 
 		//-------------------------------------------------
 		private IEnumerator Start()
 		{
-			_instance = this;
+			// 如果本对象不是单例实例（可能在 Awake 中被另一个实例保留），销毁并退出协程
+			if (_instance != this)
+			{
+				Destroy(gameObject);
+				yield break;
+			}
 
-            while (SteamVR.initializedState == SteamVR.InitializedStates.None || SteamVR.initializedState == SteamVR.InitializedStates.Initializing)
-                yield return null;
+			while (SteamVR.initializedState == SteamVR.InitializedStates.None || SteamVR.initializedState == SteamVR.InitializedStates.Initializing)
+				yield return null;
 
 			if ( SteamVR.instance != null )
 			{

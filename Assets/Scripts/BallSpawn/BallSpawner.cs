@@ -38,6 +38,9 @@ public class BallSpawner : MonoBehaviour
     [Tooltip("Monster Health increasment after wave group (default in 30).")]
     public float monsterIncreaseHP = 10f;
     public int CurrentWave { get; private set; } = 1;
+    [Header("Control")]
+    [Tooltip("If true the spawner will begin spawning automatically in Start(). If false, call BeginSpawning() when ready.")]
+    public bool startOnAwake = false;
 
     
     private int remainingBalls = 0;
@@ -66,7 +69,10 @@ public class BallSpawner : MonoBehaviour
         {
             return;
         }
-        StartCoroutine(SpawnWaveCoroutine(CurrentWave));
+        if (startOnAwake)
+        {
+            StartCoroutine(SpawnWaveCoroutine(CurrentWave));
+        }
     }
 
     /// <summary>
@@ -165,6 +171,26 @@ public class BallSpawner : MonoBehaviour
         StopAllCoroutines();
         // optionally destroy existing spawned balls
         // then start
+        StartCoroutine(SpawnWaveCoroutine(CurrentWave));
+    }
+
+    /// <summary>
+    /// Begin spawning from the current wave. Call this from other managers (e.g. TutorialManager) when ready.
+    /// </summary>
+    public void BeginSpawning()
+    {
+        if (ballPrefab == null)
+        {
+            Debug.LogError("BallSpawner: BeginSpawning called but ballPrefab is null.");
+            return;
+        }
+        if (spawnPoints == null || spawnPoints.Count == 0)
+        {
+            Debug.LogError("BallSpawner: BeginSpawning called but no spawn points configured.");
+            return;
+        }
+
+        StopAllCoroutines();
         StartCoroutine(SpawnWaveCoroutine(CurrentWave));
     }
 

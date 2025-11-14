@@ -42,6 +42,7 @@ public class M1A1 : MonoBehaviour
     [Header("FrostShot")]
     [Range(0f, 1f)]
     public float frostShotChance = 0.02f;
+    public void IncreaseFrostChanceByAbsolute(float chance) { frostShotChance += chance; }
     public float frostTime = 2f;
     public float speedSlowRate = 0.1f;
     [Header("FireShot")]
@@ -91,8 +92,8 @@ public class M1A1 : MonoBehaviour
 
     public GameObject initText;
     [Header("Audio")]
-    public AudioSource audioSource;   // Ç¹ÉÏµÄ AudioSource
-    public AudioClip fireClip;        // ¿ª»ðÒôÐ§
+    public AudioSource audioSource;   // Ç¹ï¿½Ïµï¿½ AudioSource
+    public AudioClip fireClip;        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð§
     void Start()
     {
         animator = GetComponentInChildren<Animator>(true);
@@ -312,6 +313,15 @@ public class M1A1 : MonoBehaviour
             if (transform.parent != attach)
                 transform.SetParent(attach, true);
         }
+
+        // Ensure teleport is allowed while this weapon is attached to hand
+        var allowTeleport = GetComponent<AllowTeleportWhileAttachedToHand>();
+        if (allowTeleport == null)
+        {
+            allowTeleport = gameObject.AddComponent<AllowTeleportWhileAttachedToHand>();
+        }
+        allowTeleport.teleportAllowed = true;
+        allowTeleport.overrideHoverLock = true;
     }
 
     public void OnDetachedFromHand(Valve.VR.InteractionSystem.Hand hand)

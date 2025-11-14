@@ -94,6 +94,8 @@ public class M1911 : MonoBehaviour
     /// </summary>
     [Range(0f, 1f)]
     public float frostShotChance = 0.05f;
+
+    public void IncreaseFrostChanceByAbsolute(float chance) { frostShotChance += chance; }
     /// <summary>
     /// Frost slow time for enemy which is shotted by frost bullet.
     /// </summary>
@@ -499,6 +501,15 @@ public class M1911 : MonoBehaviour
             if (transform.parent != attach)
                 transform.SetParent(attach, /*worldPositionStays*/ true);
         }
+
+        // Ensure teleport is allowed while this weapon is attached to hand
+        var allowTeleport = GetComponent<AllowTeleportWhileAttachedToHand>();
+        if (allowTeleport == null)
+        {
+            allowTeleport = gameObject.AddComponent<AllowTeleportWhileAttachedToHand>();
+        }
+        allowTeleport.teleportAllowed = true;
+        allowTeleport.overrideHoverLock = true;
 
        
     }

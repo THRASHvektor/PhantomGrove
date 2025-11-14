@@ -6,6 +6,7 @@
 
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -226,6 +227,13 @@ namespace Valve.VR.InteractionSystem
 			if ( !string.IsNullOrEmpty( switchToScene ) )
 			{
 				Debug.Log("<b>[SteamVR Interaction]</b> TeleportPoint: Hook up your level loading logic to switch to new scene: " + switchToScene, this);
+				// 如果 Player 设置为跨场景保留（DontDestroyOnLoad），在加载新场景前销毁旧的实例，
+				// 否则旧的 Player 会继续存在并与新场景中的 Player/手冲突或失去控制权。
+				if ( Player.instance != null && Player.instance.gameObject != null )
+				{
+					Destroy( Player.instance.gameObject );
+				}
+				SceneManager.LoadScene(switchToScene);
 			}
 			else
 			{
