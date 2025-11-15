@@ -13,6 +13,22 @@ public class PlayerController : MonoBehaviour
     public SteamVR_Input_Sources turnHand = SteamVR_Input_Sources.RightHand;
     public float turnSpeedDegPerSec = 180f;
     [Range(0f, 0.5f)] public float turnDeadzone = 0.2f;
+    // Snap turn (瞬时转向) 设置
+    [Tooltip("Snap turn left boolean action (optional)")]
+    public SteamVR_Action_Boolean snapTurnLeftAction;
+    [Tooltip("Snap turn right boolean action (optional)")]
+    public SteamVR_Action_Boolean snapTurnRightAction;
+    [Tooltip("Snap angle in degrees (e.g. 45)")]
+    public float snapAngle = 45f;
+    [Tooltip("Cooldown between snap turns (seconds)")]
+    public float snapCooldown = 0.25f;
+    private float _lastSnapTime = -10f;
+    [Tooltip("If the vertical axis (push up) on the stick is above this value, snap turns are disabled (use for teleport input)")]
+    [Range(0f, 1f)] public float snapDisableVerticalThreshold = 0.75f;
+    [Tooltip("Teleport boolean action - when true, snap turns are disabled (optional)")]
+    public SteamVR_Action_Boolean teleportAction;
+    [Tooltip("Input source for teleport action")]
+    public SteamVR_Input_Sources teleportHand = SteamVR_Input_Sources.Any;
 
     [Header("Menu")]
     public SteamVR_Action_Boolean menuAction;                  // 绑定你的菜单按钮
@@ -117,6 +133,40 @@ public class PlayerController : MonoBehaviour
                 Vector3 pivot = new Vector3(hmd.position.x, transform.position.y, hmd.position.z);
                 float yaw = x * turnSpeedDegPerSec * Time.deltaTime;
                 transform.RotateAround(pivot, Vector3.up, yaw);
+            }
+        }
+
+        // Snap turn（瞬时转向）: 检测 SnapTurnLeft / SnapTurnRight action 的 down 事件并立即旋转
+        // 如果摇杆正在向上推（用于 teleport），则禁用 snap turn
+        float verticalPush = 0f;
+        if (turnAction != null)
+            verticalPush = Mathf.Max(verticalPush, turnAction.GetAxis(turnHand).y);
+        if (moveAction != null)
+            verticalPush = Mathf.Max(verticalPush, moveAction.GetAxis(moveHand).y);
+
+        bool teleportActive = (teleportAction != null) && teleportAction.GetState(teleportHand);
+
+        if (!teleportActive && verticalPush <= snapDisableVerticalThreshold && Time.time - _lastSnapTime >= snapCooldown)
+        {
+            bool didSnap = false;
+            float snapYaw = 0f;
+
+            if (snapTurnRightAction != null && snapTurnRightAction.GetStateDown(turnHand))
+            {
+                snapYaw = Mathf.Abs(snapAngle);
+                didSnap = true;
+            }
+            else if (snapTurnLeftAction != null && snapTurnLeftAction.GetStateDown(turnHand))
+            {
+                snapYaw = -Mathf.Abs(snapAngle);
+                didSnap = true;
+            }
+
+            if (didSnap)
+            {
+                Vector3 pivot = new Vector3(hmd.position.x, transform.position.y, hmd.position.z);
+                transform.RotateAround(pivot, Vector3.up, snapYaw);
+                _lastSnapTime = Time.time;
             }
         }
 
