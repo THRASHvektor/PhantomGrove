@@ -1,4 +1,4 @@
-# Phantom Grove (Prototype Stage)   
+# Phantom Grove (Implementation Stage)   
 Group18's Project of COMP5424  
 Game Name: Phantom Grove  
 
@@ -13,19 +13,22 @@ During the game, **make sure your VR can detect your controller** to prevent une
 (Oculus controller is used during the development. However, some report that is not working properly.)
 
 ## Developed Content:  
-1.Basic player controller to allow users with controllers to control the player's movement, including moving, turning, and teleporting.  
-2.Wave Controller and Monsters. The Wave Controller manages the game difficulty; monsters will be spawned wave by wave and will become more numerous and harder to defeat. Monsters will hunt the player unless the player defeats them.  
-3.Card Manager. Cards are designed as rewards for players who survive after several waves to improve their abilities and probability of surviving in the next waves. Cards will appear randomly, and you can choose only one of them during the card selection stage. Card effects will be applied permanently in the game.  
-4.Single Shot Weapon (Pistol). A single-shot firearm is available to pick up on the battlefield. Use it to defeat enemies and shoot cards for upgrades.  
-5.Basic Battle Map. The battle takes place in a valley, and monsters will come from every direction.  
+1. Basic player controller to allow users with controllers to control the player's movement, including moving, turning, and teleporting.  
+2. Wave Controller and Monsters. The Wave Controller manages the game difficulty; monsters will be spawned wave by wave and will become more numerous and harder to defeat. Monsters will hunt the player unless the player defeats them.  
+3. Card Manager. Cards are designed as rewards for players who survive after several waves to improve their abilities and probability of surviving in the next waves. Cards will appear randomly, and you can choose only one of them during the card selection stage. Card effects will be applied permanently in the game.  
+4. Single Shot Weapon (Pistol). A single-shot firearm is available to pick up on the battlefield. Use it to defeat enemies and shoot cards for upgrades.  
+5. Basic Battle Map. The battle takes place in a valley, and monsters will come from every direction.  
+6. Submachine Gun. An automatic rifle is available to pick up on the battlefield.
+7. Tutorial Scene. Players first start in a new scene to learn and experience the game's features. They can then choose to transport to the battlefield to begin combat.
+8. Menu UI. Players can now open the Menu by pressing the X button on the left controller. The menu allows them to pause the game or restart the current scene.
+9. Damage Indicator. When players hit monsters, the feedback now includes both briefly turning the monster model red and popping up numbers to show the exact damage.
+10. Special Card Effects. Frost, Fire, and Critical bullet cards are now available. Frost bullets turn monsters blue and slow their movement speed, fire bullets deal continuous damage over time, and critical bullets double the damage dealt. Players can try all of these in the tutorial scene.
+11. Sound and BGM. All sound effects are now active in the game, providing an immersive audio experience.
 
 ## Undeveloped Content:
-1.Another types of enemy, improve the algorithm for monster to chase player.  
-2.Automatic shooter.  
-3.Map improvement.  
-4.Special card effect.  
-5.Spatial sound effect.  
-6.UI interaction.  
+1.Another types of enemy.  
+2.Map improvement.  
+
 
 ## Group Members:  
  Name  | GithubID | StudentID
