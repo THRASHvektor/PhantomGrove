@@ -32,6 +32,14 @@ public class SystemMenu : MonoBehaviour
     {
         Debug.LogWarning("ResumeGame!!");
         Time.timeScale = 1f;
+        if (leftHand)
+        {
+            leftHand.GetComponent<Valve.VR.InteractionSystem.UI_LaserPointer>().enabled = false;
+        }
+        if (rightHand)
+        {
+            rightHand.GetComponent<Valve.VR.InteractionSystem.UI_LaserPointer>().enabled = false;
+        }
         Destroy(transform.parent.gameObject);
         
     }

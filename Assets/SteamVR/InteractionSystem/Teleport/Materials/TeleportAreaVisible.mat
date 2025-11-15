@@ -38,5 +38,5 @@ Material:
     - _Darken: 0
     - _SeeThru: 0.25
     m_Colors:
-    - _TintColor: {r: 1, g: 1, b: 1, a: 1}
+    - _TintColor: {r: 0.21960783, g: 0.21960783, b: 0.21960783, a: 0}
   m_BuildTextureStacks: []
